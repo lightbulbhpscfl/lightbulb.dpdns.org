@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Split-Segment Clock</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: #080a0d;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Courier New', monospace;
+  }
+
+  .clock {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .digit-pair { display: flex; gap: 10px; }
+
+  .colon {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 14px;
+    padding: 0 2px;
+  }
+
+  .colon-dot {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: #00d4ff;
+    box-shadow: 0 0 6px #00d4ff, 0 0 14px #00d4ff, 0 0 28px #00d4ff44;
+    animation: blink 1s step-end infinite;
+  }
+
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50%       { opacity: 0.1; }
+  }
+
+  .ampm {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    gap: 5px;
+    padding-bottom: 3px;
+    font-size: 10px;
+    letter-spacing: 1px;
+  }
+
+  .ampm span {
+    color: #0d2530;
+    transition: color 0.3s, text-shadow 0.3s;
+  }
+
+  .ampm span.on {
+    color: #00d4ff;
+    text-shadow: 0 0 6px #00d4ff, 0 0 14px #00d4ff, 0 0 28px #00d4ff66;
+  }
+</style>
+</head>
+<body>
+
+<div class="clock">
+  <div class="digit-pair">
+    <svg id="d0" width="44" height="76" viewBox="0 0 44 76"></svg>
+    <svg id="d1" width="44" height="76" viewBox="0 0 44 76"></svg>
+  </div>
+  <div class="colon">
+    <div class="colon-dot"></div>
+    <div class="colon-dot"></div>
+  </div>
+  <div class="digit-pair">
+    <svg id="d2" width="44" height="76" viewBox="0 0 44 76"></svg>
+    <svg id="d3" width="44" height="76" viewBox="0 0 44 76"></svg>
+  </div>
+  <div class="colon">
+    <div class="colon-dot"></div>
+    <div class="colon-dot"></div>
+  </div>
+  <div class="digit-pair">
+    <svg id="d4" width="44" height="76" viewBox="0 0 44 76"></svg>
+    <svg id="d5" width="44" height="76" viewBox="0 0 44 76"></svg>
+  </div>
+  <div class="ampm">
+    <span id="ap-am">AM</span>
+    <span id="ap-pm">PM</span>
+  </div>
+</div>
+
+<script>
+/*
+  ═══════════════════════════════════════════════════════════════
+  SPLIT-SEGMENT DISPLAY — 22 SEGMENTS PER DIGIT
+  ═══════════════════════════════════════════════════════════════
+
+  Based on a 7-segment display where every bar is split into
+  two equal halves (14 segments), plus a rotated-square diamond
+  drawn inside each of the two rectangular cells (upper & lower)
+  of the figure-8, adding 4 more segments each = 8 extra.
+
+  ── Bar segments (0–13) ────────────────────────────────────────
+
+    7-seg name │ Split indices
+    ───────────┼───────────────────────────────────────
+    a  top     │  0 (left half)   1 (right half)
+    b  top-R   │  2 (top half)    3 (bottom half)
+    c  bot-R   │  4 (top half)    5 (bottom half)
+    d  bottom  │  6 (left half)   7 (right half)
+    e  bot-L   │  8 (top half)    9 (bottom half)
+    f  top-L   │ 10 (top half)   11 (bottom half)
+    g  middle  │ 12 (left half)  13 (right half)
+
+  ── Diamond segments (14–21) ───────────────────────────────────
+
+  The two rectangular cells of the figure-8 each contain a
+  diamond (45° rotated square). The diamond's four sides are
+  the four segments, going clockwise from the top point:
+
+    Upper cell (between top bar and middle bar):
+      14  top-right side   (top point → right point)
+      15  bottom-right side (right point → bottom point)
+      16  bottom-left side  (bottom point → left point)
+      17  top-left side     (left point → top point)
+
+    Lower cell (between middle bar and bottom bar):
+      18  top-right side
+      19  bottom-right side
+      20  bottom-left side
+      21  top-left side
+
+  Diamond points are the centres of the four sides of each cell:
+    top    = midpoint of the horizontal bar above the cell
+    right  = midpoint of the right vertical bar of the cell
+    bottom = midpoint of the horizontal bar below the cell
+    left   = midpoint of the left vertical bar of the cell
+
+  ═══════════════════════════════════════════════════════════════
+*/
+
+// ── Geometry ─────────────────────────────────────────────────
+const W  = 44, H = 76;
+const P  = 5;           // outer padding
+const MX = W / 2;       // 22 — horizontal centre
+
+const yT  = P;           //  5 — top bar y
+const yM  = H / 2;       // 38 — middle bar y
+const yB  = H - P;       // 71 — bottom bar y
+const xL  = P;           //  5 — left bar x
+const xR  = W - P;       // 39 — right bar x
+
+// Vertical midpoints (for splitting bar segs and for diamond points)
+const yTM = (yT + yM) / 2;   // 21.5 — mid of top-half verticals
+const yBM = (yM + yB) / 2;   // 54.5 — mid of bot-half verticals
+
+// Diamond centre points (centre of each cell)
+const diaUY = (yT + yM) / 2;   // upper diamond vertical centre  = yTM
+const diaLY = (yM + yB) / 2;   // lower diamond vertical centre  = yBM
+const diaCX = MX;               // both diamonds share horizontal centre
+
+// Diamond cardinal points (mid of each bounding side)
+//   Upper cell:
+const uTop   = [MX,  yT ];   // mid of top bar
+const uRight = [xR,  yTM];   // mid of top-right vertical
+const uBot   = [MX,  yM ];   // mid of middle bar
+const uLeft  = [xL,  yTM];   // mid of top-left vertical
+//   Lower cell:
+const lTop   = [MX,  yM ];   // mid of middle bar
+const lRight = [xR,  yBM];
+const lBot   = [MX,  yB ];   // mid of bottom bar
+const lLeft  = [xL,  yBM];
+
+// ── Segment coordinate table ──────────────────────────────────
+// Each entry: [x1, y1, x2, y2]
+const SEGMENTS = [
+  // ── Bar segments 0–13 ──
+  [xL,  yT,  MX,  yT ],   //  0: top bar, left half
+  [MX,  yT,  xR,  yT ],   //  1: top bar, right half
+
+  [xR,  yT,  xR,  yTM],   //  2: top-right vert, top half
+  [xR,  yTM, xR,  yM ],   //  3: top-right vert, bottom half
+
+  [xR,  yM,  xR,  yBM],   //  4: bot-right vert, top half
+  [xR,  yBM, xR,  yB ],   //  5: bot-right vert, bottom half
+
+  [xL,  yB,  MX,  yB ],   //  6: bottom bar, left half
+  [MX,  yB,  xR,  yB ],   //  7: bottom bar, right half
+
+  [xL,  yM,  xL,  yBM],   //  8: bot-left vert, top half
+  [xL,  yBM, xL,  yB ],   //  9: bot-left vert, bottom half
+
+  [xL,  yT,  xL,  yTM],   // 10: top-left vert, top half
+  [xL,  yTM, xL,  yM ],   // 11: top-left vert, bottom half
+
+  [xL,  yM,  MX,  yM ],   // 12: middle bar, left half
+  [MX,  yM,  xR,  yM ],   // 13: middle bar, right half
+
+  // ── Upper diamond 14–17 (clockwise from top) ──
+  [...uTop,   ...uRight],  // 14: top-right side
+  [...uRight, ...uBot  ],  // 15: bottom-right side
+  [...uBot,   ...uLeft ],  // 16: bottom-left side
+  [...uLeft,  ...uTop  ],  // 17: top-left side
+
+  // ── Lower diamond 18–21 (clockwise from top) ──
+  [...lTop,   ...lRight],  // 18: top-right side
+  [...lRight, ...lBot  ],  // 19: bottom-right side
+  [...lBot,   ...lLeft ],  // 20: bottom-left side
+  [...lLeft,  ...lTop  ],  // 21: top-left side
+
+  // ── Centre vertical 22–25 (top to bottom) ──
+  [MX,  yT,  MX,  yTM],   // 22: centre vert, top quarter
+  [MX,  yTM, MX,  yM ],   // 23: centre vert, upper-mid quarter
+  [MX,  yM,  MX,  yBM],   // 24: centre vert, lower-mid quarter
+  [MX,  yBM, MX,  yB ],   // 25: centre vert, bottom quarter
+];
+
+/*
+  ── Character definitions ──────────────────────────────────────
+  List the segment indices that should be ON for each character.
+  Segments not listed will be dim/off.
+
+  Diamond segments (14–21) are included below where they look
+  natural in the empty cells of each numeral.
+*/
+
+const CHARS = {
+  //       0   1   2   3   4   5   6   7   8   9  10  11  12  13  14  15  16  17  18  19  20  21
+  //      top bar  |  top-R  |  bot-R  | bot bar | bot-L  |  top-L  |  mid bar | upper diamond | lower diamond
+  '0': [ ,3, 4,, 8,11,14,17,19,20],
+  '1': [17,22,23,24,25                       ],
+  '2': [ 14,15,17,21,9,6,7],
+  '3': [ 0,6,12,14,15,18,19],
+  '4': [    1,  2,3, 4,5,           ,11,      12,13,17],
+  '5': [ 0,1,      18,19, 6,      10,11,      12   ],
+  '6': [ 1,8,11,12,17,18,19,20],
+  '7': [ 0,1, 2, 15, 25, 24                            ],
+  '8': [ 14,15,16,17,18,19,20,21],
+  '9': [3,4,6,13,14,16,17,19],
+  ' ': [],
+};
+
+// ── Rendering ─────────────────────────────────────────────────
+const COLOR_ON  = '#0b1c26';
+const COLOR_OFF = '#00d4ff';
+const SW        = 2.5;
+
+function renderDigit(svgEl, char) {
+  const onSet = new Set(CHARS[char] ?? []);
+  svgEl.innerHTML = "";
+  for (let i = 0; i < SEGMENTS.length; i++) {
+    const [x1,y1,x2,y2] = SEGMENTS[i];
+    const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+    line.setAttribute("x1", x1); line.setAttribute("y1", y1);
+    line.setAttribute("x2", x2); line.setAttribute("y2", y2);
+    line.setAttribute("stroke", !onSet.has(i) ? COLOR_ON : COLOR_OFF);
+    line.setAttribute("stroke-width", SW);
+    line.setAttribute("stroke-linecap", "round");
+    svgEl.appendChild(line);
+  }
+}
+
+// ── Clock tick ────────────────────────────────────────────────
+const digits = [0,1,2,3,4,5].map(i => document.getElementById('d'+i));
+const amEl   = document.getElementById('ap-am');
+const pmEl   = document.getElementById('ap-pm');
+
+function tick() {
+  const now = new Date();
+  let h  = now.getHours();
+  const m = now.getMinutes();
+  const s = now.getSeconds();
+  const isPM = h >= 12;
+  h = h % 12 || 12;
+
+  const str = String(h).padStart(2,' ') + String(m).padStart(2,'0') + String(s).padStart(2,'0');
+  str.split('').forEach((c, i) => renderDigit(digits[i], c));
+
+  amEl.className = isPM ? '' : 'on';
+  pmEl.className = isPM ? 'on' : '';
+}
+
+tick();
+setInterval(tick, 1000);
+</script>
+</body>
+</html>
