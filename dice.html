@@ -4,125 +4,11 @@
 <meta charset="UTF-8">
 <title>Dice Roller 🎲</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<style>
-  :root {
-    --bg: linear-gradient(135deg, #f1f5f9, #e2e8f0);
-    --text: #0f172a;
-    --card: rgba(0, 0, 0, 0.05);
-    --highlight: #0ea5e9;
-    --button-bg: #0ea5e9;
-    --button-text: #ffffff;
-    --muted: #475569;
-    --dice-bg: #ffffff;
-    --dot-color: #0f172a;
-    --dice-border: #cbd5e1;
-  }
-
-  @media (prefers-color-scheme: dark) {
-    :root {
-      --bg: linear-gradient(135deg, #0f172a, #1e293b);
-      --text: #e2e8f0;
-      --card: rgba(255, 255, 255, 0.05);
-      --highlight: #38bdf8;
-      --button-bg: #38bdf8;
-      --button-text: #0f172a;
-      --muted: #94a3b8;
-      --dice-bg: #1e293b;
-      --dot-color: #e2e8f0;
-      --dice-border: #38bdf8; /* brighter border for dark mode */
-    }
-  }
-
-  body {
-    margin: 0;
-    font-family: Arial, Helvetica, sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    height: 100vh;
-    transition: background 0.3s ease, color 0.3s ease;
-  }
-
-  .container {
-    text-align: center;
-    max-width: 500px;
-    padding: 40px;
-    background: var(--card);
-    border-radius: 16px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-    backdrop-filter: blur(10px);
-    transition: background 0.3s ease;
-  }
-
-  h1 {
-    font-size: 2.5rem;
-    margin-bottom: 20px;
-  }
-
-  .dice {
-    width: 120px;
-    height: 120px;
-    margin: 30px auto;
-    background: var(--dice-bg);
-    border-radius: 16px;
-    border: 3px solid var(--dice-border);
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    grid-template-rows: repeat(3, 1fr);
-    gap: 10px;
-    padding: 10px;
-    box-shadow: 0 5px 20px rgba(0,0,0,0.4);
-    transition: transform 3s cubic-bezier(0.25, 1, 0.5, 1);
-  }
-
-  .dot {
-    width: 20px;
-    height: 20px;
-    background: var(--dot-color);
-    border-radius: 50%;
-    justify-self: center;
-    align-self: center;
-    opacity: 0;
-    transition: opacity 0.2s;
-  }
-
-  .dot.visible {
-    opacity: 1;
-  }
-
-  .btn {
-    display: inline-block;
-    margin-top: 20px;
-    padding: 14px 28px;
-    font-size: 1rem;
-    color: var(--button-text);
-    background: var(--button-bg);
-    border: none;
-    border-radius: 999px;
-    text-decoration: none;
-    font-weight: bold;
-    transition: all 0.3s ease;
-  }
-
-  .btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(0,0,0,0.3);
-    filter: brightness(1.1);
-  }
-
-  footer {
-    margin-top: 30px;
-    font-size: 0.8rem;
-    color: var(--muted);
-  }
-</style>
+<link rel="stylesheet" href="styles.css">
 </head>
 
 <body>
-  <div class="container">
+  <div class="container" style="max-width: 500px;">
     <h1>Dice Roller 🎲</h1>
 
     <div class="dice">
@@ -159,32 +45,26 @@ const patterns = {
 };
 
 function rollDice() {
-  // Hide all dots first
   dots.forEach(dot => dot.classList.remove('visible'));
 
-  // Random dice number
   const number = Math.floor(Math.random() * 6) + 1;
 
-  // Spin
-  const spins = 10 + Math.floor(Math.random() * 10); // 10-19 full spins
+  const spins = 10 + Math.floor(Math.random() * 10);
   const possibleAngles = [0, 90, 180, 270];
   const finalAngle = possibleAngles[Math.floor(Math.random() * 4)];
 
   dice.style.transition = "transform 3s cubic-bezier(0.25, 1, 0.5, 1)";
   dice.style.transform = `rotate(${360 * spins + finalAngle}deg)`;
 
-  // Reveal dots after animation ends
   setTimeout(() => {
     patterns[number].forEach(i => dots[i].classList.add('visible'));
-  }, 3000); // matches 3s animation
+  }, 3000);
 }
 
-// Roll on page load
 window.onload = () => {
   setTimeout(rollDice, 200);
 };
 
-// Roll on button click
 rollBtn.addEventListener('click', (e) => {
   e.preventDefault();
   rollDice();

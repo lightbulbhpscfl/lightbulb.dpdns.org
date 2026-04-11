@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Secret Encoder 🔐</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    /* Page-specific styles only */
+    .container {
+      max-width: 600px;
+    }
+
+    h1 {
+      margin-bottom: 8px;
+    }
+
+    .subtitle {
+      font-size: 0.95rem;
+      color: var(--muted);
+      margin-bottom: 24px;
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 110px;
+      padding: 12px;
+      font-size: 0.95rem;
+      font-family: 'Courier New', monospace;
+      border-radius: 10px;
+      border: 2px solid var(--dice-border);
+      background: var(--dice-bg);
+      color: var(--text);
+      resize: vertical;
+      box-sizing: border-box;
+      transition: border-color 0.2s;
+      outline: none;
+    }
+
+    textarea:focus {
+      border-color: var(--highlight);
+    }
+
+    textarea[readonly] {
+      opacity: 0.85;
+      cursor: default;
+    }
+
+    label {
+      display: block;
+      text-align: left;
+      font-size: 0.8rem;
+      font-weight: bold;
+      color: var(--muted);
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .field {
+      margin-bottom: 16px;
+    }
+
+    .mode-badge {
+      display: inline-block;
+      margin-bottom: 16px;
+      padding: 5px 14px;
+      border-radius: 999px;
+      font-size: 0.8rem;
+      font-weight: bold;
+      background: var(--card);
+      color: var(--highlight);
+      border: 1.5px solid var(--highlight);
+      transition: all 0.3s;
+      min-width: 120px;
+    }
+
+    .btn-row {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .btn-secondary {
+      background: var(--card);
+      color: var(--text);
+      border: 2px solid var(--dice-border);
+    }
+
+    .btn-secondary:hover {
+      border-color: var(--highlight);
+      color: var(--highlight);
+      filter: none;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <h1>Secret Encoder 🔐</h1>
+    <p class="subtitle">Encodes every character into <code>%XX</code> hex — even letters. Paste encoded text to decode it automatically.</p>
+
+    <div class="field">
+      <label>Input</label>
+      <textarea id="inputBox" placeholder="Type a secret message, or paste encoded text..."></textarea>
+    </div>
+
+    <div class="mode-badge" id="modeBadge">⏳ Waiting...</div>
+
+    <div class="btn-row">
+      <a class="btn" href="#" id="actionBtn">Encode / Decode</a>
+      <a class="btn btn-secondary" href="#" id="copyBtn">Copy Output</a>
+      <a class="btn btn-secondary" href="#" id="clearBtn">Clear</a>
+    </div>
+
+    <div class="field" style="margin-top: 20px;">
+      <label>Output</label>
+      <textarea id="outputBox" readonly placeholder="Result will appear here..."></textarea>
+    </div>
+
+    <footer>made by Carter Anderson</footer>
+  </div>
+
+  <script>
+    const inputBox  = document.getElementById('inputBox');
+    const outputBox = document.getElementById('outputBox');
+    const actionBtn = document.getElementById('actionBtn');
+    const copyBtn   = document.getElementById('copyBtn');
+    const clearBtn  = document.getElementById('clearBtn');
+    const modeBadge = document.getElementById('modeBadge');
+
+    // Encode EVERY character to %XX (even letters/numbers)
+    function encodeAll(str) {
+      return str.split('').map(ch => {
+        const bytes = new TextEncoder().encode(ch);
+        return Array.from(bytes).map(b => '%' + b.toString(16).toUpperCase().padStart(2, '0')).join('');
+      }).join('');
+    }
+
+    // Decode %XX sequences back to text
+    function decodeAll(str) {
+      try {
+        return decodeURIComponent(str);
+      } catch {
+        return '⚠️ Could not decode — is the input valid encoded text?';
+      }
+    }
+
+    // Detect if the input looks like fully percent-encoded text
+    // (i.e. nearly every character is a %XX sequence)
+    function looksEncoded(str) {
+      const trimmed = str.trim();
+      if (!trimmed) return false;
+      const percentTokens = (trimmed.match(/%[0-9a-fA-F]{2}/g) || []).length;
+      // Count characters that are NOT part of a %XX token
+      const nonEncoded = trimmed.replace(/%[0-9a-fA-F]{2}/g, '').length;
+      // If >60% of the string is made up of %XX tokens, treat as encoded
+      return percentTokens > 0 && (percentTokens * 3) / trimmed.length > 0.6;
+    }
+
+    function updateBadge() {
+      const val = inputBox.value;
+      if (!val.trim()) {
+        modeBadge.textContent = '⏳ Waiting...';
+      } else if (looksEncoded(val)) {
+        modeBadge.textContent = '🔓 Detected: Encoded → will Decode';
+      } else {
+        modeBadge.textContent = '🔒 Detected: Plain text → will Encode';
+      }
+    }
+
+    function run() {
+      const input = inputBox.value;
+      if (!input.trim()) return;
+      if (looksEncoded(input)) {
+        outputBox.value = decodeAll(input);
+      } else {
+        outputBox.value = encodeAll(input);
+      }
+    }
+
+    actionBtn.addEventListener('click', e => { e.preventDefault(); run(); });
+
+    copyBtn.addEventListener('click', e => {
+      e.preventDefault();
+      if (!outputBox.value) return;
+      navigator.clipboard.writeText(outputBox.value).then(() => {
+        copyBtn.textContent = 'Copied!';
+        setTimeout(() => copyBtn.textContent = 'Copy Output', 1500);
+      });
+    });
+
+    clearBtn.addEventListener('click', e => {
+      e.preventDefault();
+      inputBox.value = '';
+      outputBox.value = '';
+      updateBadge();
+    });
+
+    inputBox.addEventListener('input', updateBadge);
+  </script>
+</body>
+</html>

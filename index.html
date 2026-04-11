@@ -4,117 +4,28 @@
   <meta charset="UTF-8">
   <title>My Personal Server</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-  <style>
-    :root {
-      --bg: linear-gradient(135deg, #f1f5f9, #e2e8f0);
-      --text: #0f172a;
-      --card: rgba(0, 0, 0, 0.05);
-      --highlight: #0ea5e9;
-      --button-bg: #0ea5e9;
-      --button-text: #ffffff;
-      --muted: #475569;
-    }
-
-    @media (prefers-color-scheme: dark) {
-      :root {
-        --bg: linear-gradient(135deg, #0f172a, #1e293b);
-        --text: #e2e8f0;
-        --card: rgba(255, 255, 255, 0.05);
-        --highlight: #38bdf8;
-        --button-bg: #38bdf8;
-        --button-text: #0f172a;
-        --muted: #94a3b8;
-      }
-    }
-
-    body {
-      margin: 0;
-      font-family: Arial, Helvetica, sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      height: 100vh;
-      transition: background 0.3s ease, color 0.3s ease;
-    }
-
-    .container {
-      text-align: center;
-      max-width: 700px;
-      padding: 40px;
-      background: var(--card);
-      border-radius: 16px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-      backdrop-filter: blur(10px);
-      transition: background 0.3s ease;
-    }
-
-    h1 {
-      font-size: 2.8rem;
-      margin-bottom: 10px;
-    }
-
-    p {
-      font-size: 1.1rem;
-      line-height: 1.6;
-      color: var(--muted);
-    }
-
-    .highlight {
-      color: var(--highlight);
-      font-weight: bold;
-    }
-
-    .btn {
-      display: inline-block;
-      margin-top: 30px;
-      padding: 14px 28px;
-      font-size: 1rem;
-      color: var(--button-text);
-      background: var(--button-bg);
-      border: none;
-      border-radius: 999px;
-      text-decoration: none;
-      font-weight: bold;
-      transition: all 0.3s ease;
-    }
-
-    .btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(0,0,0,0.3);
-      filter: brightness(1.1);
-    }
-
-    footer {
-      margin-top: 30px;
-      font-size: 0.8rem;
-      color: var(--muted);
-    }
-  </style>
+  <link rel="stylesheet" href="styles.css">
 </head>
 
 <body>
-  <div class="container">
+  <div class="container" style="max-width: 700px;">
     <h1>Welcome to My Server 🚀</h1>
     
     <p>
       H! This is my website, I made it, and I put it on the internet. It's literally running from a computer at my house. It just has whatever random stuff I decide to add :)
     </p>
-    <a class="btn" href="https://lightbulb.dpdns.org/clock.html" style="margin-right: 25px; margin-left: 25px;">
+    <a class="btn" href="clock.html" style="margin: 10px;">
       Retro clock
     </a>
-    <a class="btn" href="https://lightbulb.dpdns.org/dice.html" style="margin-right: 25px; margin-left: 25px;">
+    <a class="btn" href="dice.html" style="margin: 10px;">
       Roll a dice
+    </a>
+    <a class="btn" href="encode.html" style="margin: 10px;">
+      Secret Encoder
     </a>
 
     <footer>
-      
-
-
-
-made by Carter Anderson
+      made by Carter Anderson
     </footer>
   </div>
 </body>

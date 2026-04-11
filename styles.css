@@ -1,0 +1,123 @@
+:root {
+  --bg: linear-gradient(135deg, #f1f5f9, #e2e8f0);
+  --text: #0f172a;
+  --card: rgba(0, 0, 0, 0.05);
+  --highlight: #0ea5e9;
+  --button-bg: #0ea5e9;
+  --button-text: #ffffff;
+  --muted: #475569;
+  --dice-bg: #ffffff;
+  --dot-color: #0f172a;
+  --dice-border: #cbd5e1;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: linear-gradient(135deg, #0f172a, #1e293b);
+    --text: #e2e8f0;
+    --card: rgba(255, 255, 255, 0.05);
+    --highlight: #38bdf8;
+    --button-bg: #38bdf8;
+    --button-text: #0f172a;
+    --muted: #94a3b8;
+    --dice-bg: #1e293b;
+    --dot-color: #e2e8f0;
+    --dice-border: #38bdf8;
+  }
+}
+
+body {
+  margin: 0;
+  font-family: Arial, Helvetica, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  transition: background 0.3s ease, color 0.3s ease;
+}
+
+.container {
+  text-align: center;
+  padding: 40px;
+  background: var(--card);
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+  backdrop-filter: blur(10px);
+  transition: background 0.3s ease;
+}
+
+h1 {
+  font-size: 2.5rem;
+  margin-bottom: 20px;
+}
+
+p {
+  font-size: 1.1rem;
+  line-height: 1.6;
+  color: var(--muted);
+}
+
+.highlight {
+  color: var(--highlight);
+  font-weight: bold;
+}
+
+.btn {
+  display: inline-block;
+  margin-top: 20px;
+  padding: 14px 28px;
+  font-size: 1rem;
+  color: var(--button-text);
+  background: var(--button-bg);
+  border: none;
+  border-radius: 999px;
+  text-decoration: none;
+  font-weight: bold;
+  transition: all 0.3s ease;
+}
+
+.btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+  filter: brightness(1.1);
+}
+
+footer {
+  margin-top: 30px;
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+/* --- Dice-specific styles (only used on dice.html) --- */
+.dice {
+  width: 120px;
+  height: 120px;
+  margin: 30px auto;
+  background: var(--dice-bg);
+  border-radius: 16px;
+  border: 3px solid var(--dice-border);
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(3, 1fr);
+  gap: 10px;
+  padding: 10px;
+  box-shadow: 0 5px 20px rgba(0,0,0,0.4);
+  transition: transform 3s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.dot {
+  width: 20px;
+  height: 20px;
+  background: var(--dot-color);
+  border-radius: 50%;
+  justify-self: center;
+  align-self: center;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.dot.visible {
+  opacity: 1;
+}
