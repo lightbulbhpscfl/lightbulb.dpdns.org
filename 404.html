@@ -7,7 +7,6 @@
   <link rel="stylesheet" href="styles.css">
 
   <style>
-    /* Topbar from Techies */
     .topbar {
       position: fixed;
       top: 0;
@@ -39,7 +38,7 @@
       margin: 0 6px;
     }
 
-    /* Push content below the fixed topbar */
+
     body {
       padding-top: 60px;
     }
@@ -68,7 +67,6 @@
     const breadcrumb = document.getElementById("breadcrumb");
     const path = window.location.pathname.split("/").filter(Boolean);
 
-    // Always add root link first
     const rootLink = document.createElement("a");
     rootLink.href = "/";
     rootLink.textContent = window.location.hostname || "Home";
