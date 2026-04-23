@@ -17,21 +17,26 @@
     /* INFO TABLE */
     .info-table {
       width: 100%;
-      border-collapse: collapse;
+      border-collapse: separate;
+      border-spacing: 0;
+      border-radius: 10px;
+      overflow: hidden;
+      outline: 2px solid color-mix(in srgb, currentColor 40%, transparent);
       margin-bottom: 1rem;
     }
     .info-table td {
       padding: 0.5rem 0.75rem;
-      border: 1px solid #ddd;
+      border-bottom: 1px solid color-mix(in srgb, currentColor 20%, transparent);
       vertical-align: top;
     }
-    .info-table tr:nth-child(even) td {
-      background-color: #f5f5f5;
+    .info-table tr:last-child td {
+      border-bottom: none;
     }
     .info-table td:first-child {
       font-weight: 600;
       width: 40%;
       white-space: nowrap;
+      border-right: 1px solid color-mix(in srgb, currentColor 20%, transparent);
     }
     .bulb-link {
       color: #0066cc;
