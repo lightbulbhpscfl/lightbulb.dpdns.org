@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Intermatic Countdown Timer</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="../../styles.css">
+  <style>
+    .section-title {
+      font-size: 1.4rem;
+      font-weight: 600;
+      margin: 2rem 0 0.75rem 0;
+      border-bottom: 2px solid var(--muted);
+      padding-bottom: 0.3rem;
+    }
+
+    /* INFO TABLE */
+    .info-table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      border-radius: 10px;
+      border: 2px solid var(--muted);
+      margin-bottom: 1rem;
+      overflow: hidden;
+    }
+    .info-table td {
+      padding: 0.5rem 0.75rem;
+      border-bottom: 1px solid var(--muted);
+      vertical-align: top;
+    }
+    .info-table tr:last-child td {
+      border-bottom: none;
+    }
+    .info-table td:first-child {
+      font-weight: 600;
+      width: 40%;
+      white-space: nowrap;
+      border-right: 1px solid var(--muted);
+    }
+    /* Fix: border-radius on table requires rounded corners on corner cells */
+    .info-table tr:first-child td:first-child { border-top-left-radius: 8px; }
+    .info-table tr:first-child td:last-child  { border-top-right-radius: 8px; }
+    .info-table tr:last-child  td:first-child { border-bottom-left-radius: 8px; }
+    .info-table tr:last-child  td:last-child  { border-bottom-right-radius: 8px; }
+    .bulb-link {
+      color: #0066cc;
+      text-decoration: underline;
+    }
+
+    /* PICTURES */
+    .pictures-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+    .pictures-grid img {
+      width: 100%;
+      aspect-ratio: 4 / 3;
+      object-fit: cover;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+      display: block;
+    }
+
+    /* VIDEO */
+    .video-wrapper {
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 6px 24px rgba(0, 0, 0, 0.35);
+      margin-bottom: 1rem;
+    }
+    .video-wrapper iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Intermatic 30-Minute Countdown Timer</h1>
+
+    <!-- INFO -->
+    <div class="section-title">Info</div>
+    <table class="info-table">
+      <tr>
+        <td>Brand</td>
+        <td>Intermatic</td>
+      </tr>
+      <tr>
+        <td>Model Number</td>
+        <td>FD30MWC</td>
+      </tr>
+      <tr>
+        <td>Voltage Rating</td>
+        <td>277VAC</td>
+      </tr>
+      <tr>
+        <td>Power Source</td>
+        <td>Spring Wound</td>
+      </tr>
+      <tr>
+        <td>Timer Length</td>
+        <td>120V</td>
+      </tr>
+      <tr>
+        <td>Switch Type</td>
+        <td>SPST</td>
+      </tr>
+    </table>
+
+
+    <!-- PICTURES -->
+    <div class="section-title">Pictures</div>
+    <div class="pictures-grid">
+      <img src="image.jpg" alt="Intermatic Timer">
+    </div>
+
+    <!-- VIDEO -->
+    <div class="section-title">Video</div>
+    <div class="video-wrapper">
+      <iframe
+        src="https://www.youtube.com/watch?v=Ob5hcRWILP0"
+        title="YouTube video player"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+        referrerpolicy="strict-origin-when-cross-origin"
+        allowfullscreen>
+      </iframe>
+    </div>
+
+    <footer>made by Carter Anderson</footer>
+  </div>
+
+</body>
+</html>
