@@ -7,6 +7,11 @@
   <link rel="stylesheet" href="../../styles.css">
 </head>
 <body>
+
+  <div class="topbar">
+    <div class="topbar-inner" id="breadcrumb"></div>
+  </div>
+
   <div class="container">
     <h1>My Lighting Equipment</h1>
 
@@ -17,5 +22,45 @@
       made by Carter Anderson
     </footer>
   </div>
+
+  <script>
+    (function () {
+      var bc = document.getElementById("breadcrumb");
+      var homeLink = document.createElement("a");
+      homeLink.href = "/";
+      var logo = document.createElement("img");
+      logo.src = "/logo-mid-res.png";
+      logo.alt = "lightbulb.dpdns.org";
+      logo.className = "topbar-logo";
+      logo.onerror = function () {
+        homeLink.textContent = "lightbulb.dpdns.org";
+        if (logo.parentNode) homeLink.removeChild(logo);
+      };
+      homeLink.appendChild(logo);
+      bc.appendChild(homeLink);
+      var segments = window.location.pathname.split("/").filter(Boolean);
+      var builtPath = "";
+      segments.forEach(function (seg, i) {
+        builtPath += "/" + seg;
+        var sep = document.createElement("span");
+        sep.className = "topbar-sep";
+        sep.textContent = "→";
+        bc.appendChild(sep);
+        var name = decodeURIComponent(seg).replace(/[-_]/g, " ").replace(/\.\w+$/, "");
+        name = name.charAt(0).toUpperCase() + name.slice(1);
+        if (i === segments.length - 1) {
+          var span = document.createElement("span");
+          span.textContent = name;
+          bc.appendChild(span);
+        } else {
+          var link = document.createElement("a");
+          link.href = builtPath;
+          link.textContent = name;
+          bc.appendChild(link);
+        }
+      });
+    })();
+  </script>
+
 </body>
 </html>
