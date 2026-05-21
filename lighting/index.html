@@ -6,28 +6,65 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="../styles.css">
 </head>
-
 <body>
+
+  <div class="topbar">
+    <div class="topbar-inner" id="breadcrumb"></div>
+  </div>
+
   <div class="container" style="max-width: 700px;">
     <h1>My Lighting Stuff</h1>
-    
+
     <p>
       Here's all my lighting equiment. Bulbs, fixtures, equipment. I'll be adding more over time.
     </p>
-    <a class="btn" href="bulbs" style="margin: 10px;">
-     Bulbs
-    </a>
-    <a class="btn" href="fixtures" style="margin: 10px;">
-     Fixtures
-    </a>
-    <a class="btn" href="equipment" style="margin: 10px;">
-     Equipment
-    </a>
-
+    <a class="btn" href="bulbs" style="margin: 10px;">Bulbs</a>
+    <a class="btn" href="fixtures" style="margin: 10px;">Fixtures</a>
+    <a class="btn" href="equipment" style="margin: 10px;">Equipment</a>
 
     <footer>
       made by Carter Anderson
     </footer>
   </div>
+
+  <script>
+    (function () {
+      var bc = document.getElementById("breadcrumb");
+      var homeLink = document.createElement("a");
+      homeLink.href = "/";
+      var logo = document.createElement("img");
+      logo.src = "/logo-mid-res.png";
+      logo.alt = "lightbulb.dpdns.org";
+      logo.className = "topbar-logo";
+      logo.onerror = function () {
+        homeLink.textContent = "lightbulb.dpdns.org";
+        if (logo.parentNode) homeLink.removeChild(logo);
+      };
+      homeLink.appendChild(logo);
+      bc.appendChild(homeLink);
+      var segments = window.location.pathname.split("/").filter(Boolean);
+      var builtPath = "";
+      segments.forEach(function (seg, i) {
+        builtPath += "/" + seg;
+        var sep = document.createElement("span");
+        sep.className = "topbar-sep";
+        sep.textContent = "→";
+        bc.appendChild(sep);
+        var name = decodeURIComponent(seg).replace(/[-_]/g, " ").replace(/\.\w+$/, "");
+        name = name.charAt(0).toUpperCase() + name.slice(1);
+        if (i === segments.length - 1) {
+          var span = document.createElement("span");
+          span.textContent = name;
+          bc.appendChild(span);
+        } else {
+          var link = document.createElement("a");
+          link.href = builtPath;
+          link.textContent = name;
+          bc.appendChild(link);
+        }
+      });
+    })();
+  </script>
+
 </body>
 </html>
