@@ -6,97 +6,44 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="styles.css">
   <style>
-    /* Page-specific styles only */
-    .container {
-      max-width: 600px;
-    }
-
-    h1 {
-      margin-bottom: 8px;
-    }
-
-    .subtitle {
-      font-size: 0.95rem;
-      color: var(--muted);
-      margin-bottom: 24px;
-    }
-
+    .container { max-width: 600px; }
+    h1 { margin-bottom: 8px; }
+    .subtitle { font-size: 0.95rem; color: var(--muted); margin-bottom: 24px; }
     textarea {
-      width: 100%;
-      min-height: 110px;
-      padding: 12px;
-      font-size: 0.95rem;
-      font-family: 'Courier New', monospace;
-      border-radius: 10px;
-      border: 2px solid var(--dice-border);
-      background: var(--dice-bg);
-      color: var(--text);
-      resize: vertical;
-      box-sizing: border-box;
-      transition: border-color 0.2s;
-      outline: none;
+      width: 100%; min-height: 110px; padding: 12px;
+      font-size: 0.95rem; font-family: 'Courier New', monospace;
+      border-radius: 10px; border: 2px solid var(--dice-border);
+      background: var(--dice-bg); color: var(--text);
+      resize: vertical; box-sizing: border-box;
+      transition: border-color 0.2s; outline: none;
     }
-
-    textarea:focus {
-      border-color: var(--highlight);
-    }
-
-    textarea[readonly] {
-      opacity: 0.85;
-      cursor: default;
-    }
-
+    textarea:focus { border-color: var(--highlight); }
+    textarea[readonly] { opacity: 0.85; cursor: default; }
     label {
-      display: block;
-      text-align: left;
-      font-size: 0.8rem;
-      font-weight: bold;
-      color: var(--muted);
-      margin-bottom: 6px;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
+      display: block; text-align: left; font-size: 0.8rem;
+      font-weight: bold; color: var(--muted); margin-bottom: 6px;
+      text-transform: uppercase; letter-spacing: 0.05em;
     }
-
-    .field {
-      margin-bottom: 16px;
-    }
-
+    .field { margin-bottom: 16px; }
     .mode-badge {
-      display: inline-block;
-      margin-bottom: 16px;
-      padding: 5px 14px;
-      border-radius: 999px;
-      font-size: 0.8rem;
-      font-weight: bold;
-      background: var(--card);
-      color: var(--highlight);
-      border: 1.5px solid var(--highlight);
-      transition: all 0.3s;
-      min-width: 120px;
+      display: inline-block; margin-bottom: 16px; padding: 5px 14px;
+      border-radius: 999px; font-size: 0.8rem; font-weight: bold;
+      background: var(--card); color: var(--highlight);
+      border: 1.5px solid var(--highlight); transition: all 0.3s; min-width: 120px;
     }
-
-    .btn-row {
-      display: flex;
-      gap: 12px;
-      justify-content: center;
-      flex-wrap: wrap;
-    }
-
+    .btn-row { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
     .btn-secondary {
-      background: var(--card);
-      color: var(--text);
-      border: 2px solid var(--dice-border);
+      background: var(--card); color: var(--text); border: 2px solid var(--dice-border);
     }
-
-    .btn-secondary:hover {
-      border-color: var(--highlight);
-      color: var(--highlight);
-      filter: none;
-    }
+    .btn-secondary:hover { border-color: var(--highlight); color: var(--highlight); filter: none; }
   </style>
 </head>
-
 <body>
+
+  <div class="topbar">
+    <div class="topbar-inner" id="breadcrumb"></div>
+  </div>
+
   <div class="container">
     <h1>Secret Encoder 🔐</h1>
     <p class="subtitle">Encodes every character into <code>%XX</code> hex — even letters. Paste encoded text to decode it automatically.</p>
@@ -123,6 +70,43 @@
   </div>
 
   <script>
+    (function () {
+      var bc = document.getElementById("breadcrumb");
+      var homeLink = document.createElement("a");
+      homeLink.href = "/";
+      var logo = document.createElement("img");
+      logo.src = "/logo-mid-res.png";
+      logo.alt = "lightbulb.dpdns.org";
+      logo.className = "topbar-logo";
+      logo.onerror = function () {
+        homeLink.textContent = "lightbulb.dpdns.org";
+        if (logo.parentNode) homeLink.removeChild(logo);
+      };
+      homeLink.appendChild(logo);
+      bc.appendChild(homeLink);
+      var segments = window.location.pathname.split("/").filter(Boolean);
+      var builtPath = "";
+      segments.forEach(function (seg, i) {
+        builtPath += "/" + seg;
+        var sep = document.createElement("span");
+        sep.className = "topbar-sep";
+        sep.textContent = "→";
+        bc.appendChild(sep);
+        var name = decodeURIComponent(seg).replace(/[-_]/g, " ").replace(/\.\w+$/, "");
+        name = name.charAt(0).toUpperCase() + name.slice(1);
+        if (i === segments.length - 1) {
+          var span = document.createElement("span");
+          span.textContent = name;
+          bc.appendChild(span);
+        } else {
+          var link = document.createElement("a");
+          link.href = builtPath;
+          link.textContent = name;
+          bc.appendChild(link);
+        }
+      });
+    })();
+
     const inputBox  = document.getElementById('inputBox');
     const outputBox = document.getElementById('outputBox');
     const actionBtn = document.getElementById('actionBtn');
@@ -130,58 +114,35 @@
     const clearBtn  = document.getElementById('clearBtn');
     const modeBadge = document.getElementById('modeBadge');
 
-    // Encode EVERY character to %XX (even letters/numbers)
     function encodeAll(str) {
       return str.split('').map(ch => {
         const bytes = new TextEncoder().encode(ch);
         return Array.from(bytes).map(b => '%' + b.toString(16).toUpperCase().padStart(2, '0')).join('');
       }).join('');
     }
-
-    // Decode %XX sequences back to text
     function decodeAll(str) {
-      try {
-        return decodeURIComponent(str);
-      } catch {
-        return '⚠️ Could not decode — is the input valid encoded text?';
-      }
+      try { return decodeURIComponent(str); }
+      catch { return '⚠️ Could not decode — is the input valid encoded text?'; }
     }
-
-    // Detect if the input looks like fully percent-encoded text
-    // (i.e. nearly every character is a %XX sequence)
     function looksEncoded(str) {
       const trimmed = str.trim();
       if (!trimmed) return false;
       const percentTokens = (trimmed.match(/%[0-9a-fA-F]{2}/g) || []).length;
-      // Count characters that are NOT part of a %XX token
       const nonEncoded = trimmed.replace(/%[0-9a-fA-F]{2}/g, '').length;
-      // If >60% of the string is made up of %XX tokens, treat as encoded
       return percentTokens > 0 && (percentTokens * 3) / trimmed.length > 0.6;
     }
-
     function updateBadge() {
       const val = inputBox.value;
-      if (!val.trim()) {
-        modeBadge.textContent = '⏳ Waiting...';
-      } else if (looksEncoded(val)) {
-        modeBadge.textContent = '🔓 Detected: Encoded → will Decode';
-      } else {
-        modeBadge.textContent = '🔒 Detected: Plain text → will Encode';
-      }
+      if (!val.trim()) modeBadge.textContent = '⏳ Waiting...';
+      else if (looksEncoded(val)) modeBadge.textContent = '🔓 Detected: Encoded → will Decode';
+      else modeBadge.textContent = '🔒 Detected: Plain text → will Encode';
     }
-
     function run() {
       const input = inputBox.value;
       if (!input.trim()) return;
-      if (looksEncoded(input)) {
-        outputBox.value = decodeAll(input);
-      } else {
-        outputBox.value = encodeAll(input);
-      }
+      outputBox.value = looksEncoded(input) ? decodeAll(input) : encodeAll(input);
     }
-
     actionBtn.addEventListener('click', e => { e.preventDefault(); run(); });
-
     copyBtn.addEventListener('click', e => {
       e.preventDefault();
       if (!outputBox.value) return;
@@ -190,14 +151,7 @@
         setTimeout(() => copyBtn.textContent = 'Copy Output', 1500);
       });
     });
-
-    clearBtn.addEventListener('click', e => {
-      e.preventDefault();
-      inputBox.value = '';
-      outputBox.value = '';
-      updateBadge();
-    });
-
+    clearBtn.addEventListener('click', e => { e.preventDefault(); inputBox.value = ''; outputBox.value = ''; updateBadge(); });
     inputBox.addEventListener('input', updateBadge);
   </script>
 </body>
