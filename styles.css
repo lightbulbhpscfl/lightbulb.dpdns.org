@@ -157,11 +157,15 @@ footer {
 }
 /* --- Logo image --- */
 .logo {
+  --scale: 1;
+
   display: inline-block;
-  height: 1em;
-  aspect-ratio: 473 / 821; /* adjust to your logo */
+  height: calc(1em * var(--scale, 1));
+  aspect-ratio: 473 / 821;
+
   background-image: url("/logo-mid-res.png");
   background-size: contain;
   background-repeat: no-repeat;
+
   vertical-align: -0.1em;
 }
