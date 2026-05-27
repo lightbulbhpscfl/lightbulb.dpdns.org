@@ -162,7 +162,7 @@ footer {
   display: inline-block;
   height: calc(1em * var(--scale));
   aspect-ratio: 473 / 821;
-
+vertical-align: middle;
   background: url("/logo-mid-res.png") no-repeat center;
   background-size: contain;
 
