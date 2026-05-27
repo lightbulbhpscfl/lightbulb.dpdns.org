@@ -159,7 +159,7 @@ footer {
 .logo {
   display: inline-block;
   height: 1em;
-  width: 1em;
+  width: auto;
   background-image: url("/logo-mid-res.png");
   background-size: contain;
   background-repeat: no-repeat;
