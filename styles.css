@@ -155,3 +155,13 @@ footer {
 .dot.visible {
   opacity: 1;
 }
+/* --- Logo image --- */
+.logo {
+  display: inline-block;
+  height: 1em;
+  width: auto;
+  background-image: url("logo-mid-res.png");
+  background-size: contain;
+  background-repeat: no-repeat;
+  vertical-align: -0.1em;
+}
