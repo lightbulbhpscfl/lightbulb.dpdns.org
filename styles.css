@@ -160,12 +160,11 @@ footer {
   --scale: 1;
 
   display: inline-block;
-  height: calc(1em * var(--scale, 1));
+  height: calc(1em * var(--scale));
   aspect-ratio: 473 / 821;
 
-  background-image: url("/logo-mid-res.png");
+  background: url("/logo-mid-res.png") no-repeat center;
   background-size: contain;
-  background-repeat: no-repeat;
 
-  vertical-align: -0.1em;
+  vertical-align: middle; /* key change */
 }
