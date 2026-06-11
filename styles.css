@@ -136,9 +136,6 @@ footer {
   font-size: 0.9rem;
   color: var(--muted);
   z-index: 1000;
-  /* position:relative so the absolutely-placed gear button
-     is contained here and doesn't affect any scroll context */
-  position: relative;
 }
 
 .topbar-inner {
@@ -149,6 +146,8 @@ footer {
   gap: 4px;
   white-space: nowrap;
   overflow-x: auto;
+  /* position:relative so gear button is anchored here, not to viewport */
+  position: relative;
   /* right padding keeps breadcrumb text from sliding under the gear */
   padding-right: 44px;
 }

@@ -77,10 +77,10 @@
   // ═══════════════════════════════════════════════════════
   function buildSettings() {
 
-    // Gear button goes into .topbar directly (NOT .topbar-inner)
-    // so it never contributes to that element's scroll width
-    var topbar = document.querySelector(".topbar");
-    if (!topbar) return;
+    // Gear button goes into .topbar-inner which is position:relative,
+    // so absolute positioning anchors to it without affecting scroll width
+    var topbarInner = document.querySelector(".topbar-inner");
+    if (!topbarInner) return;
 
     var btn = document.createElement("button");
     btn.className = "settings-btn";
@@ -100,7 +100,7 @@
       btn.style.lineHeight = "1";
     };
     btn.appendChild(gearImg);
-    topbar.appendChild(btn);
+    topbarInner.appendChild(btn);
 
     // Panel is a child of <body> so it escapes all overflow contexts
     var panel = document.createElement("div");
