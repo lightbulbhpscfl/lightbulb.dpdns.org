@@ -3,7 +3,7 @@
   // ═══════════════════════════════════════════════════════
   //  CONFIG
   // ═══════════════════════════════════════════════════════
-  var GEAR_ICON_URL  = "/global-icons/gear.svg";
+  var GEAR_ICON_URL  = "/global-icons/gear.png";
   var DROPDOWN_LABEL = "Settings";
 
 
