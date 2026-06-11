@@ -10,8 +10,38 @@
   --dot-color: #0f172a;
   --dice-border: #cbd5e1;
 }
+
+/* ── Explicit dark theme (data-theme="dark" on <html>) ── */
+[data-theme="dark"] {
+  --bg: linear-gradient(135deg, #0f172a, #1e293b);
+  --text: #e2e8f0;
+  --card: rgba(255, 255, 255, 0.05);
+  --highlight: #38bdf8;
+  --button-bg: #38bdf8;
+  --button-text: #0f172a;
+  --muted: #94a3b8;
+  --dice-bg: #1e293b;
+  --dot-color: #e2e8f0;
+  --dice-border: #38bdf8;
+}
+
+/* ── Explicit light theme (data-theme="light" on <html>) ── */
+[data-theme="light"] {
+  --bg: linear-gradient(135deg, #f1f5f9, #e2e8f0);
+  --text: #0f172a;
+  --card: rgba(0, 0, 0, 0.05);
+  --highlight: #0ea5e9;
+  --button-bg: #0ea5e9;
+  --button-text: #ffffff;
+  --muted: #475569;
+  --dice-bg: #ffffff;
+  --dot-color: #0f172a;
+  --dice-border: #cbd5e1;
+}
+
+/* ── System default (no data-theme set) ── */
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not([data-theme]) {
     --bg: linear-gradient(135deg, #0f172a, #1e293b);
     --text: #e2e8f0;
     --card: rgba(255, 255, 255, 0.05);
@@ -24,6 +54,7 @@
     --dice-border: #38bdf8;
   }
 }
+
 body {
   margin: 0;
   font-family: Arial, Helvetica, sans-serif;
@@ -126,6 +157,38 @@ footer {
   color: var(--muted);
 }
 
+/* --- Theme toggle button --- */
+.theme-toggle {
+  margin-left: auto;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 0;
+  background: var(--card);
+  border: 1.5px solid var(--dice-border);
+  border-radius: 999px;
+  padding: 3px 5px;
+  cursor: pointer;
+}
+.theme-toggle button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 0.85rem;
+  padding: 3px 7px;
+  border-radius: 999px;
+  color: var(--muted);
+  transition: background 0.2s, color 0.2s;
+  line-height: 1;
+}
+.theme-toggle button.active {
+  background: var(--button-bg);
+  color: var(--button-text);
+}
+.theme-toggle button:hover:not(.active) {
+  color: var(--highlight);
+}
+
 /* --- Dice-specific styles (only used on dice.html) --- */
 .dice {
   width: 120px;
@@ -162,9 +225,9 @@ footer {
   display: inline-block;
   height: calc(1em * var(--scale));
   aspect-ratio: 473 / 821;
-vertical-align: middle;
+  vertical-align: middle;
   background: url("/logo-mid-res.png") no-repeat center;
   background-size: contain;
 
-  vertical-align: middle; /* key change */
+  vertical-align: middle;
 }
