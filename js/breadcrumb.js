@@ -3,7 +3,7 @@
   // ═══════════════════════════════════════════════════════
   //  CONFIG
   // ═══════════════════════════════════════════════════════
-  var GEAR_ICON_URL  = "/global-icons/gear.png";
+  var GEAR_ICON_URL  = "/global-icons/gear.png";  // change to .svg if needed
   var DROPDOWN_LABEL = "Settings";
 
 
@@ -18,77 +18,6 @@
       document.documentElement.removeAttribute("data-theme");
     }
   })();
-
-
-  // ═══════════════════════════════════════════════════════
-  //  STYLES
-  // ═══════════════════════════════════════════════════════
-  function injectStyles() {
-    var style = document.createElement("style");
-    style.textContent = [
-      /* Gear button inside topbar */
-      ".settings-btn{",
-      "  background:none;border:none;cursor:pointer;",
-      "  display:flex;align-items:center;justify-content:center;",
-      "  padding:4px;border-radius:6px;margin-left:auto;flex-shrink:0;",
-      "  opacity:0.65;transition:opacity 0.2s,transform 0.4s;",
-      "}",
-      ".settings-btn:hover{opacity:1;}",
-      ".settings-btn img{width:20px;height:20px;display:block;}",
-      ".settings-btn.open{transform:rotate(60deg);opacity:1;}",
-
-      /* Floating panel — child of <body>, not topbar */
-      ".settings-panel{",
-      "  position:fixed;",          /* fixed so it escapes every overflow context */
-      "  z-index:9999;",
-      "  display:none;",
-      "  border:1.5px solid var(--dice-border);",
-      "  border-radius:12px;padding:12px 14px;",
-      "  box-shadow:0 8px 24px rgba(0,0,0,0.22);",
-      "  min-width:180px;",
-      "  backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);",
-      "  background:var(--settings-panel-bg,rgba(241,245,249,0.97));",
-      "}",
-      ".settings-panel.open{display:block;}",
-
-      /* Panel colours per theme */
-      "[data-theme='light'] .settings-panel{--settings-panel-bg:rgba(241,245,249,0.97);}",
-      "[data-theme='dark']  .settings-panel{--settings-panel-bg:rgba(15,23,42,0.97);}",
-      "@media(prefers-color-scheme:dark){",
-      "  :root:not([data-theme]) .settings-panel{--settings-panel-bg:rgba(15,23,42,0.97);}",
-      "}",
-
-      /* Gear icon invert on dark */
-      "[data-theme='dark'] .settings-btn img{filter:invert(1);}",
-      "@media(prefers-color-scheme:dark){",
-      "  :root:not([data-theme]) .settings-btn img{filter:invert(1);}",
-      "}",
-
-      /* Section label */
-      ".settings-section-label{",
-      "  display:block;font-size:0.7rem;font-weight:700;",
-      "  letter-spacing:0.07em;text-transform:uppercase;",
-      "  color:var(--muted);margin-bottom:8px;",
-      "}",
-
-      /* Theme pill */
-      ".theme-toggle{",
-      "  display:flex;",
-      "  background:var(--card);",
-      "  border:1.5px solid var(--dice-border);",
-      "  border-radius:999px;padding:3px 4px;",
-      "}",
-      ".theme-toggle button{",
-      "  background:none;border:none;cursor:pointer;",
-      "  font-size:0.8rem;padding:3px 9px;",
-      "  border-radius:999px;color:var(--muted);",
-      "  transition:background 0.2s,color 0.2s;line-height:1;white-space:nowrap;",
-      "}",
-      ".theme-toggle button.active{background:var(--button-bg);color:var(--button-text);}",
-      ".theme-toggle button:hover:not(.active){color:var(--highlight);}",
-    ].join("");
-    document.head.appendChild(style);
-  }
 
 
   // ═══════════════════════════════════════════════════════
@@ -146,9 +75,13 @@
   // ═══════════════════════════════════════════════════════
   //  SETTINGS GEAR + FLOATING PANEL
   // ═══════════════════════════════════════════════════════
-  function buildSettings(bc) {
+  function buildSettings() {
 
-    // ── Gear button (lives inside topbar for layout) ──
+    // Gear button goes into .topbar directly (NOT .topbar-inner)
+    // so it never contributes to that element's scroll width
+    var topbar = document.querySelector(".topbar");
+    if (!topbar) return;
+
     var btn = document.createElement("button");
     btn.className = "settings-btn";
     btn.setAttribute("aria-label", DROPDOWN_LABEL);
@@ -167,23 +100,22 @@
       btn.style.lineHeight = "1";
     };
     btn.appendChild(gearImg);
-    bc.appendChild(btn);
+    topbar.appendChild(btn);
 
-    // ── Floating panel (child of <body>) ──
+    // Panel is a child of <body> so it escapes all overflow contexts
     var panel = document.createElement("div");
     panel.className = "settings-panel";
     panel.setAttribute("role", "dialog");
     panel.setAttribute("aria-label", DROPDOWN_LABEL);
 
-    // Theme section
-    var label = document.createElement("span");
-    label.className = "settings-section-label";
-    label.textContent = "Theme";
+    var sectionLabel = document.createElement("span");
+    sectionLabel.className = "settings-section-label";
+    sectionLabel.textContent = "Theme";
 
     var MODES = [
-      { value: null,    label: "Auto", title: "Use device setting" },
-      { value: "light", label: "Light",   title: "Light mode" },
-      { value: "dark",  label: "Dark",   title: "Dark mode"  },
+      { value: null,    label: "Auto",  title: "Use device setting" },
+      { value: "light", label: "Light", title: "Light mode" },
+      { value: "dark",  label: "Dark",  title: "Dark mode"  },
     ];
 
     var pill = document.createElement("div");
@@ -207,30 +139,27 @@
       b.title = mode.title;
       if (getCurrent() === mode.value) b.classList.add("active");
       b.addEventListener("click", function (e) {
-        e.stopPropagation();          // don't bubble to document close handler
+        e.stopPropagation();
         applyTheme(mode.value);
         pill.querySelectorAll("button").forEach(function (x, i) {
           x.classList.toggle("active", MODES[i].value === mode.value);
         });
-        // panel stays open — user closes by clicking outside
+        // panel stays open on item click
       });
       pill.appendChild(b);
     });
 
-    panel.appendChild(label);
+    panel.appendChild(sectionLabel);
     panel.appendChild(pill);
-
-    // Append panel to body so it escapes every overflow/clip context
     document.body.appendChild(panel);
 
-    // ── Position panel below the gear button ──
+    // Position panel flush below the gear button
     function positionPanel() {
       var r = btn.getBoundingClientRect();
-      panel.style.top  = (r.bottom + 8) + "px";
+      panel.style.top   = (r.bottom + 8) + "px";
       panel.style.right = (window.innerWidth - r.right) + "px";
     }
 
-    // ── Toggle open/close ──
     var isOpen = false;
 
     btn.addEventListener("click", function (e) {
@@ -248,7 +177,7 @@
       }
     });
 
-    // Close when clicking outside (not inside the panel)
+    // Close only when clicking outside both button and panel
     document.addEventListener("click", function (e) {
       if (isOpen && !panel.contains(e.target) && e.target !== btn) {
         isOpen = false;
@@ -258,7 +187,6 @@
       }
     });
 
-    // Reposition if window resizes while open
     window.addEventListener("resize", function () {
       if (isOpen) positionPanel();
     });
@@ -269,11 +197,9 @@
   //  INIT
   // ═══════════════════════════════════════════════════════
   function init() {
-    injectStyles();
     var bc = document.getElementById("breadcrumb");
-    if (!bc) return;
-    buildBreadcrumb(bc);
-    buildSettings(bc);
+    if (bc) buildBreadcrumb(bc);
+    buildSettings();
   }
 
   if (document.readyState === "loading") {

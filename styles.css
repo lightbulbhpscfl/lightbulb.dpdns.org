@@ -1,3 +1,4 @@
+/* ── Variables ─────────────────────────────────────────── */
 :root {
   --bg: linear-gradient(135deg, #f1f5f9, #e2e8f0);
   --text: #0f172a;
@@ -9,9 +10,10 @@
   --dice-bg: #ffffff;
   --dot-color: #0f172a;
   --dice-border: #cbd5e1;
+  --settings-border: rgba(0, 0, 0, 0.15);
+  --settings-panel-bg: rgba(241, 245, 249, 0.97);
 }
 
-/* ── Explicit dark theme (data-theme="dark" on <html>) ── */
 [data-theme="dark"] {
   --bg: linear-gradient(135deg, #0f172a, #1e293b);
   --text: #e2e8f0;
@@ -23,9 +25,10 @@
   --dice-bg: #1e293b;
   --dot-color: #e2e8f0;
   --dice-border: #38bdf8;
+  --settings-border: rgba(255, 255, 255, 0.12);
+  --settings-panel-bg: rgba(15, 23, 42, 0.97);
 }
 
-/* ── Explicit light theme (data-theme="light" on <html>) ── */
 [data-theme="light"] {
   --bg: linear-gradient(135deg, #f1f5f9, #e2e8f0);
   --text: #0f172a;
@@ -37,9 +40,10 @@
   --dice-bg: #ffffff;
   --dot-color: #0f172a;
   --dice-border: #cbd5e1;
+  --settings-border: rgba(0, 0, 0, 0.15);
+  --settings-panel-bg: rgba(241, 245, 249, 0.97);
 }
 
-/* ── System default (no data-theme set) ── */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme]) {
     --bg: linear-gradient(135deg, #0f172a, #1e293b);
@@ -52,9 +56,12 @@
     --dice-bg: #1e293b;
     --dot-color: #e2e8f0;
     --dice-border: #38bdf8;
+    --settings-border: rgba(255, 255, 255, 0.12);
+    --settings-panel-bg: rgba(15, 23, 42, 0.97);
   }
 }
 
+/* ── Base ──────────────────────────────────────────────── */
 body {
   margin: 0;
   font-family: Arial, Helvetica, sans-serif;
@@ -68,6 +75,7 @@ body {
   box-sizing: border-box;
   transition: background 0.3s ease, color 0.3s ease;
 }
+
 .container {
   text-align: center;
   padding: 40px;
@@ -79,19 +87,17 @@ body {
   width: 90vw;
   max-width: 900px;
 }
-h1 {
-  font-size: 2.5rem;
-  margin-bottom: 20px;
-}
+
+h1 { font-size: 2.5rem; margin-bottom: 20px; }
+
 p {
   font-size: 1.1rem;
   line-height: 1.6;
   color: var(--muted);
 }
-.highlight {
-  color: var(--highlight);
-  font-weight: bold;
-}
+
+.highlight { color: var(--highlight); font-weight: bold; }
+
 .btn {
   display: inline-block;
   margin-top: 20px;
@@ -110,17 +116,17 @@ p {
   box-shadow: 0 6px 20px rgba(0,0,0,0.3);
   filter: brightness(1.1);
 }
+
 footer {
   margin-top: 30px;
   font-size: 0.8rem;
   color: var(--muted);
 }
 
-/* --- Top bar / breadcrumb --- */
+/* ── Topbar ────────────────────────────────────────────── */
 .topbar {
   position: fixed;
-  top: 0;
-  left: 0;
+  top: 0; left: 0;
   width: 100%;
   padding: 10px 20px;
   box-sizing: border-box;
@@ -130,7 +136,11 @@ footer {
   font-size: 0.9rem;
   color: var(--muted);
   z-index: 1000;
+  /* position:relative so the absolutely-placed gear button
+     is contained here and doesn't affect any scroll context */
+  position: relative;
 }
+
 .topbar-inner {
   max-width: 900px;
   margin: 0 auto;
@@ -139,7 +149,14 @@ footer {
   gap: 4px;
   white-space: nowrap;
   overflow-x: auto;
+  /* right padding keeps breadcrumb text from sliding under the gear */
+  padding-right: 44px;
 }
+
+/* Hide scrollbar on topbar-inner — it's just for overflow clipping */
+.topbar-inner::-webkit-scrollbar { display: none; }
+.topbar-inner { scrollbar-width: none; }
+
 .topbar a {
   color: var(--highlight);
   text-decoration: none;
@@ -147,52 +164,105 @@ footer {
   display: inline-flex;
   align-items: center;
 }
-.topbar-logo {
-  height: 30px;
-  width: auto;
-  display: block;
-}
-.topbar-sep {
-  margin: 0 4px;
-  color: var(--muted);
-}
 
-/* --- Theme toggle button --- */
-.theme-toggle {
-  margin-left: auto;
-  flex-shrink: 0;
+.topbar-logo { height: 30px; width: auto; display: block; }
+.topbar-sep { margin: 0 4px; color: var(--muted); }
+
+/* ── Settings gear button ──────────────────────────────── */
+/* Lives inside .topbar but outside .topbar-inner so it
+   never contributes to that element's scroll width         */
+.settings-btn {
+  position: absolute;
+  top: 50%; right: 16px;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
   display: flex;
   align-items: center;
-  gap: 0;
+  justify-content: center;
+  padding: 4px;
+  border-radius: 6px;
+  opacity: 0.65;
+  transition: opacity 0.2s, transform 0.4s;
+  z-index: 1001;
+}
+.settings-btn:hover { opacity: 1; }
+.settings-btn:focus { outline: none; }
+.settings-btn:focus-visible { outline: 2px solid var(--highlight); outline-offset: 2px; }
+.settings-btn img {
+  width: 20px; height: 20px; display: block;
+  /* invert dark icon to white in dark mode */
+}
+.settings-btn.open {
+  transform: translateY(-50%) rotate(60deg);
+  opacity: 1;
+}
+
+[data-theme="dark"] .settings-btn img,
+[data-theme="dark"] .settings-btn img { filter: invert(1); }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme]) .settings-btn img { filter: invert(1); }
+}
+
+/* ── Settings floating panel ───────────────────────────── */
+.settings-panel {
+  position: fixed;
+  z-index: 9999;
+  display: none;
+  border: 1.5px solid var(--settings-border);
+  border-radius: 12px;
+  padding: 12px 14px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.22);
+  min-width: 160px;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  background: var(--settings-panel-bg);
+}
+.settings-panel.open { display: block; }
+
+.settings-section-label {
+  display: block;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 8px;
+}
+
+/* ── Theme pill ────────────────────────────────────────── */
+.theme-toggle {
+  display: flex;
   background: var(--card);
-  border: 1.5px solid var(--dice-border);
+  border: 1.5px solid var(--settings-border);
   border-radius: 999px;
-  padding: 3px 5px;
-  cursor: pointer;
+  padding: 3px 4px;
 }
 .theme-toggle button {
   background: none;
   border: none;
   cursor: pointer;
-  font-size: 0.85rem;
-  padding: 3px 7px;
+  font-size: 0.8rem;
+  padding: 3px 9px;
   border-radius: 999px;
   color: var(--muted);
   transition: background 0.2s, color 0.2s;
   line-height: 1;
+  white-space: nowrap;
 }
 .theme-toggle button.active {
   background: var(--button-bg);
   color: var(--button-text);
 }
-.theme-toggle button:hover:not(.active) {
-  color: var(--highlight);
-}
+.theme-toggle button:hover:not(.active) { color: var(--highlight); }
+.theme-toggle button:focus,
+.theme-toggle button:active { outline: none; }
+.theme-toggle button:focus-visible { outline: 2px solid var(--highlight); outline-offset: 2px; }
 
-/* --- Dice-specific styles (only used on dice.html) --- */
+/* ── Dice ──────────────────────────────────────────────── */
 .dice {
-  width: 120px;
-  height: 120px;
+  width: 120px; height: 120px;
   margin: 30px auto;
   background: var(--dice-bg);
   border-radius: 16px;
@@ -200,34 +270,27 @@ footer {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   grid-template-rows: repeat(3, 1fr);
-  gap: 10px;
-  padding: 10px;
+  gap: 10px; padding: 10px;
   box-shadow: 0 5px 20px rgba(0,0,0,0.4);
   transition: transform 3s cubic-bezier(0.25, 1, 0.5, 1);
 }
 .dot {
-  width: 20px;
-  height: 20px;
+  width: 20px; height: 20px;
   background: var(--dot-color);
   border-radius: 50%;
-  justify-self: center;
-  align-self: center;
+  justify-self: center; align-self: center;
   opacity: 0;
   transition: opacity 0.2s;
 }
-.dot.visible {
-  opacity: 1;
-}
-/* --- Logo image --- */
+.dot.visible { opacity: 1; }
+
+/* ── Logo ──────────────────────────────────────────────── */
 .logo {
   --scale: 1;
-
   display: inline-block;
   height: calc(1em * var(--scale));
   aspect-ratio: 473 / 821;
   vertical-align: middle;
   background: url("/logo-mid-res.png") no-repeat center;
   background-size: contain;
-
-  vertical-align: middle;
 }
