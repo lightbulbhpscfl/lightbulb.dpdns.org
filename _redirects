@@ -1,5 +1,5 @@
 /lighting/fixtures/70w-hps-area-light /lighting/fixtures/woods-70w-hps-area-light 301
-/lighting/fixtures/70w-hps-area-light/* lighting/fixtures/woods-70w-hps-area-light/:splat 301
+/lighting/fixtures/70w-hps-area-light/* /lighting/fixtures/woods-70w-hps-area-light/:splat 301
 
 /clock.html /random-stuff/clock.html 301
 /dice.html /random-stuff/dice.html 301
