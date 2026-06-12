@@ -145,16 +145,10 @@ footer {
   align-items: center;
   gap: 4px;
   white-space: nowrap;
-  overflow-x: auto;
-  /* position:relative so gear button is anchored here, not to viewport */
+  overflow: hidden;
   position: relative;
-  /* right padding keeps breadcrumb text from sliding under the gear */
   padding-right: 44px;
 }
-
-/* Hide scrollbar on topbar-inner — it's just for overflow clipping */
-.topbar-inner::-webkit-scrollbar { display: none; }
-.topbar-inner { scrollbar-width: none; }
 
 .topbar a {
   color: var(--highlight);
