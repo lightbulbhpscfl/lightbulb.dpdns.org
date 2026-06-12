@@ -184,18 +184,11 @@ footer {
 .settings-btn:focus { outline: none; }
 .settings-btn:focus-visible { outline: 2px solid var(--highlight); outline-offset: 2px; }
 .settings-btn img {
-  width: 20px; height: 20px; display: block;
-  /* invert dark icon to white in dark mode */
+  width: 26px; height: 26px; display: block;
 }
 .settings-btn.open {
   transform: translateY(-50%) rotate(60deg);
   opacity: 1;
-}
-
-[data-theme="dark"] .settings-btn img,
-[data-theme="dark"] .settings-btn img { filter: invert(1); }
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme]) .settings-btn img { filter: invert(1); }
 }
 
 /* ── Settings floating panel ───────────────────────────── */
