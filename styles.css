@@ -285,8 +285,18 @@ footer {
 }
 
 /* ── Pictures grid ─────────────────────────────────────── */
-@media (orientation: portrait) {
-  .pictures-grid {
-    grid-template-columns: 1fr;
-  }
+.pictures-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.pictures-grid img {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  display: block;
 }
