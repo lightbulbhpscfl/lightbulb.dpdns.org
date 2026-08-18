@@ -23,7 +23,7 @@
   // ═══════════════════════════════════════════════════════
   //  BREADCRUMB
   // ═══════════════════════════════════════════════════════
-  function buildBreadcrumb(bc) {
+  async function buildBreadcrumb(bc) {
     var homeLink = document.createElement("a");
     homeLink.href = "/";
 
@@ -40,7 +40,10 @@
 
     var segments = window.location.pathname.split("/").filter(Boolean);
     var builtPath = "";
-    var acronyms = new Set(["HPS","MH","LPS","CMH","MV","CFL","PL","HID","PSMH"]);
+
+    var acronyms = new Set([
+      "HPS", "MH", "LPS", "CMH", "MV", "CFL", "PL", "HID", "PSMH"
+    ]);
 
     function formatName(seg) {
       return decodeURIComponent(seg)
@@ -57,8 +60,44 @@
         .join(" ");
     }
 
-    segments.forEach(function (seg) {
+    // Check whether this folder contains a breadcrumb-name file.
+    // If it does, return its contents exactly as-is.
+    async function getBreadcrumbName(folderPath, fallbackSegment) {
+      try {
+        var response = await fetch(
+          folderPath.replace(/\/$/, "") + "/breadcrumb-name",
+          {
+            cache: "no-store"
+          }
+        );
+
+        if (response.ok) {
+          return await response.text();
+        }
+      } catch (e) {
+        // Ignore fetch errors and use the normal formatted name.
+      }
+
+      return formatName(fallbackSegment);
+    }
+
+    // Fetch all breadcrumb names in parallel.
+    var names = [];
+    builtPath = "";
+
+    var namePromises = segments.map(function (seg) {
       builtPath += "/" + seg;
+      return getBreadcrumbName(builtPath, seg);
+    });
+
+    names = await Promise.all(namePromises);
+
+    // Build the breadcrumb using the resolved names.
+    builtPath = "";
+
+    segments.forEach(function (seg, index) {
+      builtPath += "/" + seg;
+
       var sep = document.createElement("span");
       sep.className = "topbar-sep";
       sep.textContent = "→";
@@ -66,7 +105,11 @@
 
       var link = document.createElement("a");
       link.href = builtPath;
-      link.textContent = formatName(seg);
+
+      // If breadcrumb-name exists, this is its contents verbatim.
+      // Otherwise, formatName() was used as the fallback.
+      link.textContent = names[index];
+
       bc.appendChild(link);
     });
   }
@@ -121,7 +164,9 @@
     var pill = document.createElement("div");
     pill.className = "theme-toggle";
 
-    function getCurrent() { return localStorage.getItem("theme"); }
+    function getCurrent() {
+      return localStorage.getItem("theme");
+    }
 
     function applyTheme(value) {
       if (value === "light" || value === "dark") {
@@ -137,15 +182,26 @@
       var b = document.createElement("button");
       b.textContent = mode.label;
       b.title = mode.title;
-      if (getCurrent() === mode.value) b.classList.add("active");
+
+      if (getCurrent() === mode.value) {
+        b.classList.add("active");
+      }
+
       b.addEventListener("click", function (e) {
         e.stopPropagation();
+
         applyTheme(mode.value);
+
         pill.querySelectorAll("button").forEach(function (x, i) {
-          x.classList.toggle("active", MODES[i].value === mode.value);
+          x.classList.toggle(
+            "active",
+            MODES[i].value === mode.value
+          );
         });
+
         // panel stays open on item click
       });
+
       pill.appendChild(b);
     });
 
@@ -156,7 +212,8 @@
     // Position panel flush below the gear button
     function positionPanel() {
       var r = btn.getBoundingClientRect();
-      panel.style.top   = (r.bottom + 8) + "px";
+
+      panel.style.top = (r.bottom + 8) + "px";
       panel.style.right = (window.innerWidth - r.right) + "px";
     }
 
@@ -164,7 +221,9 @@
 
     btn.addEventListener("click", function (e) {
       e.stopPropagation();
+
       isOpen = !isOpen;
+
       if (isOpen) {
         positionPanel();
         panel.classList.add("open");
@@ -179,7 +238,11 @@
 
     // Close only when clicking outside both button and panel
     document.addEventListener("click", function (e) {
-      if (isOpen && !panel.contains(e.target) && e.target !== btn) {
+      if (
+        isOpen &&
+        !panel.contains(e.target) &&
+        e.target !== btn
+      ) {
         isOpen = false;
         panel.classList.remove("open");
         btn.classList.remove("open");
@@ -196,9 +259,13 @@
   // ═══════════════════════════════════════════════════════
   //  INIT
   // ═══════════════════════════════════════════════════════
-  function init() {
+  async function init() {
     var bc = document.getElementById("breadcrumb");
-    if (bc) buildBreadcrumb(bc);
+
+    if (bc) {
+      await buildBreadcrumb(bc);
+    }
+
     buildSettings();
   }
 

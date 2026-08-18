@@ -4,5 +4,5 @@
 /clock.html /random-stuff/clock.html 301
 /dice.html /random-stuff/dice.html 301
 /encode.html /random-stuff/encode.html 301
-/techies /unlisted/techies_1 301
-/techies/* /unlisted/techies_1:splat 301
+/techies /unlisted/techies_01 301
+/techies/* /unlisted/techies_01:splat 301
