@@ -25,6 +25,135 @@
 
 
   // ═══════════════════════════════════════════════════════
+  //  PINNED TOPBAR
+  //  - Puts the topbar in the browser's "top layer" (popover API). That layer
+  //    sits above EVERYTHING on the page regardless of z-index, and (unlike a
+  //    modal dialog) it does not block clicks on the rest of the page.
+  //  - Reserves space for the bar so it never covers content.
+  //  - Optional: <html data-topbar-fit="true"> is for NON-scrolling pages. It
+  //    shrinks the page content (CSS zoom) so everything fits below the bar.
+  //  - It still hides on purpose while the fullscreen button is active.
+  // ═══════════════════════════════════════════════════════
+  var topbarEl = null;        // set in setupTopbar()
+  var settingsPanelEl = null; // set in buildSettings()
+  var spaceUpdatePending = false;
+
+  function findTopbar() {
+    var inner = document.querySelector(".topbar-inner");
+    if (!inner) return null;
+    return (
+      inner.closest(".topbar") ||
+      (inner.parentElement && inner.parentElement !== document.body
+        ? inner.parentElement
+        : inner)
+    );
+  }
+
+  function injectTopbarStyle() {
+    if (document.getElementById("topbar-pin-style")) return;
+
+    var style = document.createElement("style");
+    style.id = "topbar-pin-style";
+    style.textContent =
+      // Room for the bar (--topbar-h is kept up to date by updateTopbarSpace)
+      "html{box-sizing:border-box;padding-top:var(--topbar-h,0px);" +
+      "scroll-padding-top:var(--topbar-h,0px)}" +
+      // Position must beat any sticky/relative rule in your own CSS
+      "[data-topbar-pinned]{position:fixed!important;top:0!important;" +
+      "left:0!important;right:0!important;bottom:auto!important;" +
+      "box-sizing:border-box}" +
+      // Undo the popover's built-in look (centered box, border, padding...).
+      // :where() has zero specificity, so anything in your own CSS still wins.
+      ":where([data-topbar-pinned][popover]){width:100%;max-width:none;" +
+      "height:auto;max-height:none;margin:0;border:0;padding:0;" +
+      "overflow:visible;color:inherit;background-color:Canvas}";
+
+    // First in <head> so your own stylesheet can override the non-!important parts
+    document.head.insertBefore(style, document.head.firstChild);
+  }
+
+  // Measure the bar, reserve room for it, and (fit mode) scale the page.
+  function updateTopbarSpace() {
+    var root = document.documentElement;
+    var body = document.body;
+    var hidden = !topbarEl || topbarEl.style.display === "none";
+    var fit =
+      root.getAttribute("data-topbar-fit") === "true" && "zoom" in body.style;
+
+    // Measure at normal scale so an earlier zoom can't skew the result
+    if (fit || body.style.zoom) {
+      body.style.zoom = "";
+      if (topbarEl) topbarEl.style.zoom = "";
+      if (settingsPanelEl) settingsPanelEl.style.zoom = "";
+    }
+
+    var h = hidden ? 0 : Math.ceil(topbarEl.getBoundingClientRect().height);
+    root.style.setProperty("--topbar-h", h + "px");
+
+    if (fit && h > 0) {
+      var vh = window.innerHeight;
+      var s = Math.max(0.6, (vh - h) / vh);
+
+      body.style.zoom = String(s);
+      // Undo the zoom for the bar (and settings panel) so they stay full size
+      topbarEl.style.zoom = String(1 / s);
+      if (settingsPanelEl) settingsPanelEl.style.zoom = String(1 / s);
+    }
+  }
+
+  // Coalesce bursts of changes into one update per frame
+  function refreshTopbarSpace() {
+    if (spaceUpdatePending) return;
+    spaceUpdatePending = true;
+    requestAnimationFrame(function () {
+      spaceUpdatePending = false;
+      updateTopbarSpace();
+    });
+  }
+
+  // Used by the fullscreen button
+  function setTopbarHidden(hidden) {
+    if (!topbarEl) return;
+    topbarEl.style.display = hidden ? "none" : "";
+    updateTopbarSpace();
+  }
+
+  function setupTopbar() {
+    topbarEl = findTopbar();
+    if (!topbarEl) return;
+
+    injectTopbarStyle();
+    topbarEl.setAttribute("data-topbar-pinned", "");
+
+    if (typeof topbarEl.showPopover === "function") {
+      // "manual" = not closed by Esc or by clicking elsewhere
+      topbarEl.setAttribute("popover", "manual");
+      try { topbarEl.showPopover(); } catch (e) { /* ignore */ }
+
+      // If anything closes it, put it straight back
+      topbarEl.addEventListener("toggle", function (e) {
+        if (e.newState === "closed") {
+          setTimeout(function () {
+            try { topbarEl.showPopover(); } catch (err) { /* ignore */ }
+          }, 0);
+        }
+      });
+    } else {
+      // Older browsers without the popover API: best effort
+      topbarEl.style.zIndex = "2147483647";
+    }
+
+    if ("ResizeObserver" in window) {
+      new ResizeObserver(refreshTopbarSpace).observe(topbarEl);
+    }
+    window.addEventListener("resize", refreshTopbarSpace);
+    window.addEventListener("load", refreshTopbarSpace);
+
+    updateTopbarSpace();
+  }
+
+
+  // ═══════════════════════════════════════════════════════
   //  BREADCRUMB
   // ═══════════════════════════════════════════════════════
   async function buildBreadcrumb(bc) {
@@ -153,13 +282,6 @@
       return el === root;
     }
 
-    // The element to hide. Prefer .topbar; otherwise the parent of .topbar-inner.
-    var topbar =
-      topbarInner.closest(".topbar") ||
-      (topbarInner.parentElement && topbarInner.parentElement !== document.body
-        ? topbarInner.parentElement
-        : topbarInner);
-
     // ── Button ──
     var fsBtn = document.createElement("button");
     fsBtn.className = "settings-btn fullscreen-btn"; // reuses gear button styling
@@ -212,7 +334,7 @@
 
     // Single source of truth: topbar hidden ⇔ we're in fullscreen.
     function syncTopbar() {
-      topbar.style.display = isOurFullscreen() ? "none" : "";
+      setTopbarHidden(isOurFullscreen());
     }
 
     document.addEventListener("fullscreenchange", syncTopbar);
@@ -314,6 +436,7 @@
     panel.appendChild(sectionLabel);
     panel.appendChild(pill);
     document.body.appendChild(panel);
+    settingsPanelEl = panel;
 
     // Position panel flush below the gear button
     function positionPanel() {
@@ -469,6 +592,7 @@
   //  INIT
   // ═══════════════════════════════════════════════════════
   async function init() {
+    setupTopbar(); // pin the bar right away to avoid a visible jump
     buildFooter(); // runs in parallel; handles its own errors
 
     var bc = document.getElementById("breadcrumb");
@@ -478,6 +602,7 @@
     }
 
     buildSettings();
+    refreshTopbarSpace(); // bar height may have changed (breadcrumb, gear)
   }
 
   if (document.readyState === "loading") {
