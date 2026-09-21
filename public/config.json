@@ -1,10 +1,11 @@
 {
   "footer": {
-    "text": "© {year} lightbulb.dpdns.org",
+    "text": "© {year} lightbulb.dpdns.org\nMade by LightbulbHPS_CFL",
     "links": [
       { "label": "Home", "url": "/" },
-      { "label": "About", "url": "/about" },
-      { "label": "Contact", "url": "mailto:you@example.com" }
+      { "label": "Lighting", "url": "/lighting" },
+      { "label": "Games", "url": "/games" },
+      { "label": "Random", "url": "/random-stuff" }
     ]
   }
 }
