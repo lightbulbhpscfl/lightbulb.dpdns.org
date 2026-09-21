@@ -3,8 +3,12 @@
   // ═══════════════════════════════════════════════════════
   //  CONFIG
   // ═══════════════════════════════════════════════════════
-  var GEAR_ICON_URL  = "/global-icons/gear.png";  // change to .svg if needed
-  var DROPDOWN_LABEL = "Settings";
+  var GEAR_ICON_URL       = "/global-icons/gear.png";  // change to .svg if needed
+  var FULLSCREEN_ICON_URL = "/global-icons/fullscreen.svg";
+  var DROPDOWN_LABEL      = "Settings";
+  var FULLSCREEN_LABEL    = "Fullscreen";
+  var FULLSCREEN_BTN_GAP  = 8; // px between the fullscreen button and the gear
+  var CONFIG_URL          = "/config.json"; // site settings (footer text/links live here)
 
 
   // ═══════════════════════════════════════════════════════
@@ -116,6 +120,108 @@
 
 
   // ═══════════════════════════════════════════════════════
+  //  FULLSCREEN BUTTON
+  //  Only shown when <html data-fullscreen="true">.
+  //  Sits immediately to the left of the gear button.
+  //  Clicking it hides the topbar and requests browser fullscreen.
+  //  When fullscreen ends (Esc, swipe, etc.) the topbar comes back.
+  // ═══════════════════════════════════════════════════════
+  function buildFullscreenButton(topbarInner, gearBtn, closePanel) {
+
+    if (document.documentElement.getAttribute("data-fullscreen") !== "true") {
+      return;
+    }
+
+    var root = document.documentElement;
+
+    // Cross-browser (incl. older Safari) fullscreen helpers
+    var canFullscreen = !!(root.requestFullscreen || root.webkitRequestFullscreen);
+    if (!canFullscreen) return; // e.g. iPhone Safari — nothing sensible to do
+
+    function requestFs() {
+      var fn = root.requestFullscreen || root.webkitRequestFullscreen;
+      try {
+        var result = fn.call(root);
+        if (result && typeof result.catch === "function") {
+          result.catch(function () { /* user/browser denied; ignore */ });
+        }
+      } catch (e) { /* ignore */ }
+    }
+
+    function isOurFullscreen() {
+      var el = document.fullscreenElement || document.webkitFullscreenElement;
+      return el === root;
+    }
+
+    // The element to hide. Prefer .topbar; otherwise the parent of .topbar-inner.
+    var topbar =
+      topbarInner.closest(".topbar") ||
+      (topbarInner.parentElement && topbarInner.parentElement !== document.body
+        ? topbarInner.parentElement
+        : topbarInner);
+
+    // ── Button ──
+    var fsBtn = document.createElement("button");
+    fsBtn.className = "settings-btn fullscreen-btn"; // reuses gear button styling
+    fsBtn.setAttribute("aria-label", FULLSCREEN_LABEL);
+    fsBtn.title = FULLSCREEN_LABEL;
+
+    var fsImg = document.createElement("img");
+    fsImg.src = FULLSCREEN_ICON_URL;
+    fsImg.alt = "";
+    fsImg.setAttribute("aria-hidden", "true");
+    fsImg.onerror = function () {
+      if (fsImg.parentNode) fsBtn.removeChild(fsImg);
+      fsBtn.textContent = "⛶";
+      fsBtn.style.fontSize = "18px";
+      fsBtn.style.lineHeight = "1";
+    };
+    fsBtn.appendChild(fsImg);
+
+    // Insert before the gear so it's to its left even if the layout is in-flow
+    topbarInner.insertBefore(fsBtn, gearBtn);
+
+    // If the gear is absolutely positioned (as in the stylesheet), shift the
+    // fullscreen button left by the gear's offset + width + gap.
+    function positionFsBtn() {
+      var gearStyle = window.getComputedStyle(gearBtn);
+      if (gearStyle.position !== "absolute") return; // in-flow: DOM order handles it
+
+      var gearRight = parseFloat(gearStyle.right);
+      if (isNaN(gearRight)) return;
+
+      fsBtn.style.right =
+        (gearRight + gearBtn.offsetWidth + FULLSCREEN_BTN_GAP) + "px";
+    }
+
+    positionFsBtn();
+    window.addEventListener("resize", positionFsBtn);
+    window.addEventListener("load", positionFsBtn);
+    if (gearBtn.firstElementChild) {
+      gearBtn.firstElementChild.addEventListener("load", positionFsBtn);
+    }
+
+    // ── Behaviour ──
+    fsBtn.addEventListener("click", function (e) {
+      e.stopPropagation();
+      closePanel();
+      requestFs();
+      // Topbar is hidden by the fullscreenchange handler below, so that
+      // it only disappears if the browser actually entered fullscreen.
+    });
+
+    // Single source of truth: topbar hidden ⇔ we're in fullscreen.
+    function syncTopbar() {
+      topbar.style.display = isOurFullscreen() ? "none" : "";
+    }
+
+    document.addEventListener("fullscreenchange", syncTopbar);
+    document.addEventListener("webkitfullscreenchange", syncTopbar);
+    syncTopbar();
+  }
+
+
+  // ═══════════════════════════════════════════════════════
   //  SETTINGS GEAR + FLOATING PANEL
   // ═══════════════════════════════════════════════════════
   function buildSettings() {
@@ -219,6 +325,13 @@
 
     var isOpen = false;
 
+    function closePanel() {
+      isOpen = false;
+      panel.classList.remove("open");
+      btn.classList.remove("open");
+      btn.setAttribute("aria-expanded", "false");
+    }
+
     btn.addEventListener("click", function (e) {
       e.stopPropagation();
 
@@ -230,9 +343,7 @@
         btn.classList.add("open");
         btn.setAttribute("aria-expanded", "true");
       } else {
-        panel.classList.remove("open");
-        btn.classList.remove("open");
-        btn.setAttribute("aria-expanded", "false");
+        closePanel();
       }
     });
 
@@ -243,16 +354,114 @@
         !panel.contains(e.target) &&
         e.target !== btn
       ) {
-        isOpen = false;
-        panel.classList.remove("open");
-        btn.classList.remove("open");
-        btn.setAttribute("aria-expanded", "false");
+        closePanel();
       }
     });
 
     window.addEventListener("resize", function () {
       if (isOpen) positionPanel();
     });
+
+    // Fullscreen button (only if <html data-fullscreen="true">)
+    buildFullscreenButton(topbarInner, btn, closePanel);
+  }
+
+
+  // ═══════════════════════════════════════════════════════
+  //  FOOTER — built from the "footer" section of /config.json
+  //  If the page already has <footer id="site-footer"> it is filled in;
+  //  otherwise a new one is added to the end of <body>.
+  //  If config.json is missing/invalid or has no footer, nothing is added.
+  // ═══════════════════════════════════════════════════════
+  async function buildFooter() {
+    var config;
+
+    try {
+      var response = await fetch(CONFIG_URL, { cache: "no-cache" });
+      if (!response.ok) return;
+      config = await response.json();
+    } catch (e) {
+      console.warn(
+        "Could not read " + CONFIG_URL + ". If the file exists, check that it " +
+        "is valid JSON (matching brackets, commas between items, double quotes).",
+        e
+      );
+      return;
+    }
+
+    var data = config && config.footer;
+    if (!data) return;
+
+    var links = Array.isArray(data.links) ? data.links : [];
+    if (!data.text && !links.length) return;
+
+    var footer = document.getElementById("site-footer");
+
+    if (!footer) {
+      footer = document.createElement("footer");
+      footer.id = "site-footer";
+      footer.className = "site-footer";
+      document.body.appendChild(footer);
+
+      // Minimal default look, inserted FIRST in <head> so your own
+      // stylesheet can override any of it. Uses inherited colors, so it
+      // works in both light and dark themes.
+      if (!document.getElementById("site-footer-style")) {
+        var style = document.createElement("style");
+        style.id = "site-footer-style";
+        style.textContent =
+          ".site-footer{margin-top:2rem;padding:1.25rem 1rem;text-align:center;" +
+          "font-size:.875rem;border-top:1px solid rgba(128,128,128,.3)}" +
+          ".site-footer-text{margin:0;opacity:.75}" +
+          ".site-footer-links{margin-top:.5rem}" +
+          ".site-footer-links a{color:inherit;opacity:.75;text-decoration:none;margin:0 .6rem}" +
+          ".site-footer-links a:hover{opacity:1;text-decoration:underline}";
+        document.head.insertBefore(style, document.head.firstChild);
+      }
+    } else {
+      footer.textContent = ""; // clear any placeholder content
+    }
+
+    // Text (supports {year} → current year)
+    if (data.text) {
+      var p = document.createElement("p");
+      p.className = "site-footer-text";
+      p.textContent = String(data.text).replace(
+        /\{year\}/g,
+        String(new Date().getFullYear())
+      );
+      footer.appendChild(p);
+    }
+
+    // Links
+    if (links.length) {
+      var nav = document.createElement("nav");
+      nav.className = "site-footer-links";
+
+      links.forEach(function (item) {
+        if (!item || !item.url) return;
+
+        var a = document.createElement("a");
+        a.href = item.url;
+        a.textContent = item.label || item.url;
+
+        // Links to other websites open in a new tab
+        try {
+          var target = new URL(item.url, window.location.href);
+          if (
+            (target.protocol === "http:" || target.protocol === "https:") &&
+            target.origin !== window.location.origin
+          ) {
+            a.target = "_blank";
+            a.rel = "noopener noreferrer";
+          }
+        } catch (e) { /* leave as a normal link */ }
+
+        nav.appendChild(a);
+      });
+
+      if (nav.children.length) footer.appendChild(nav);
+    }
   }
 
 
@@ -260,6 +469,8 @@
   //  INIT
   // ═══════════════════════════════════════════════════════
   async function init() {
+    buildFooter(); // runs in parallel; handles its own errors
+
     var bc = document.getElementById("breadcrumb");
 
     if (bc) {

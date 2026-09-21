@@ -1,0 +1,10 @@
+{
+  "footer": {
+    "text": "© {year} lightbulb.dpdns.org",
+    "links": [
+      { "label": "Home", "url": "/" },
+      { "label": "About", "url": "/about" },
+      { "label": "Contact", "url": "mailto:you@example.com" }
+    ]
+  }
+}

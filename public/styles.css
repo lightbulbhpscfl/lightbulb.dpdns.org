@@ -27,6 +27,12 @@
   --dice-border: #38bdf8;
   --settings-border: rgba(255, 255, 255, 0.12);
   --settings-panel-bg: rgba(15, 23, 42, 0.97);
+  --footer-bg:         #14171c;
+  --footer-text:       #9aa4b2;
+  --footer-link:       #c3cad4;
+  --footer-link-hover: #6ea8ff;
+  --footer-border:     #262b33;
+
 }
 
 [data-theme="light"] {
@@ -42,6 +48,12 @@
   --dice-border: #cbd5e1;
   --settings-border: rgba(0, 0, 0, 0.15);
   --settings-panel-bg: rgba(241, 245, 249, 0.97);
+  --footer-bg:         #14171c;
+  --footer-text:       #9aa4b2;
+  --footer-link:       #c3cad4;
+  --footer-link-hover: #6ea8ff;
+  --footer-border:     #262b33;
+
 }
 
 @media (prefers-color-scheme: dark) {
@@ -321,3 +333,55 @@ footer {
     .bulb-link { color: #0066cc; text-decoration: underline; }
     .video-wrapper { width: 100%; aspect-ratio: 16 / 9; border-radius: 10px; overflow: hidden; box-shadow: 0 6px 24px rgba(0,0,0,0.35); margin-bottom: 1rem; }
     .video-wrapper iframe { width: 100%; height: 100%; border: none; display: block; }
+/* ── Footer ─────────────────────────────────────────── */
+
+.site-footer {
+  margin-top: 3rem;
+  /* extra bottom padding on phones with a home-indicator bar */
+  padding: 1.5rem 1rem calc(1.5rem + env(safe-area-inset-bottom, 0px));
+  background: var(--footer-bg);
+  color: var(--footer-text);
+  border-top: 1px solid var(--footer-border);
+  font-size: 0.875rem;
+  line-height: 1.5;
+  text-align: center;
+}
+ 
+.site-footer-text {
+  margin: 0;
+  opacity: 1;
+}
+ 
+.site-footer-links {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.25rem 1.25rem;
+  margin-top: 0.75rem;
+}
+ 
+.site-footer-links a {
+  margin: 0;
+  padding: 0.25rem 0;
+  opacity: 1;
+  color: var(--footer-link);
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+ 
+.site-footer-links a:hover {
+  color: var(--footer-link-hover);
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+ 
+.site-footer-links a:focus-visible {
+  color: var(--footer-link-hover);
+  outline: 2px solid var(--footer-link-hover);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+ 
+@media (prefers-reduced-motion: reduce) {
+  .site-footer-links a { transition: none; }
+}
