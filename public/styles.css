@@ -12,6 +12,12 @@
   --dice-border: #cbd5e1;
   --settings-border: rgba(0, 0, 0, 0.15);
   --settings-panel-bg: rgba(241, 245, 249, 0.97);
+  /* footer (light) */
+  --footer-bg:         #f6f7f9;
+  --footer-text:       #5b6470;
+  --footer-link:       #3a4452;
+  --footer-link-hover: #0b5fff;
+  --footer-border:     #e3e6ea;
 }
 
 [data-theme="dark"] {
@@ -27,12 +33,12 @@
   --dice-border: #38bdf8;
   --settings-border: rgba(255, 255, 255, 0.12);
   --settings-panel-bg: rgba(15, 23, 42, 0.97);
+  /* footer (dark) */
   --footer-bg:         #14171c;
   --footer-text:       #9aa4b2;
   --footer-link:       #c3cad4;
   --footer-link-hover: #6ea8ff;
   --footer-border:     #262b33;
-
 }
 
 [data-theme="light"] {
@@ -48,12 +54,12 @@
   --dice-border: #cbd5e1;
   --settings-border: rgba(0, 0, 0, 0.15);
   --settings-panel-bg: rgba(241, 245, 249, 0.97);
-  --footer-bg:         #14171c;
-  --footer-text:       #9aa4b2;
-  --footer-link:       #c3cad4;
-  --footer-link-hover: #6ea8ff;
-  --footer-border:     #262b33;
-
+  /* footer (light) */
+  --footer-bg:         #f6f7f9;
+  --footer-text:       #5b6470;
+  --footer-link:       #3a4452;
+  --footer-link-hover: #0b5fff;
+  --footer-border:     #e3e6ea;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -70,6 +76,12 @@
     --dice-border: #38bdf8;
     --settings-border: rgba(255, 255, 255, 0.12);
     --settings-panel-bg: rgba(15, 23, 42, 0.97);
+    /* footer (dark) */
+    --footer-bg:         #14171c;
+    --footer-text:       #9aa4b2;
+    --footer-link:       #c3cad4;
+    --footer-link-hover: #6ea8ff;
+    --footer-border:     #262b33;
   }
 }
 /* ── Page ──────────────────────────────────────────────── */
@@ -83,10 +95,15 @@ body {
   background: var(--bg);
   color: var(--text);
   display: flex;
+  /* Column: the card and the footer stack vertically instead of sitting
+     side by side. Both are still centered horizontally (align-items). */
+  flex-direction: column;
   align-items: center;
   justify-content: center;
   min-height: 100vh;
-  padding: 80px 24px 24px;
+  /* Room for the fixed topbar. --topbar-h is set by global.js (0 while the
+     bar is hidden in fullscreen). The 50px fallback + 30px = the old 80px. */
+  padding: calc(var(--topbar-h, 50px) + 30px) 24px 24px;
   box-sizing: border-box;
   transition: background 0.3s ease, color 0.3s ease;
 }
@@ -101,6 +118,9 @@ body {
   transition: background 0.3s ease;
   width: 90vw;
   max-width: 900px;
+  /* Keeps the card vertically centered in the space above the footer */
+  margin-top: auto;
+  margin-bottom: auto;
 }
 
 h1 { font-size: 2.5rem; margin-bottom: 20px; }
@@ -163,6 +183,11 @@ footer {
   overflow: hidden;
   position: relative;
   padding-right: 44px;
+}
+
+/* Pages with the fullscreen button need room for a second icon */
+html[data-fullscreen="true"] .topbar-inner {
+  padding-right: 100px;
 }
 
 .topbar a {
@@ -336,22 +361,31 @@ footer {
 /* ── Footer ─────────────────────────────────────────── */
 
 .site-footer {
-  margin-top: 3rem;
+  /* Full-width line at the bottom of the page. The negative margins cancel
+     the body's 24px side/bottom padding so the line reaches the screen
+     edges. No background — it sits on the page's own background. */
+  align-self: stretch;
+  margin: 3rem -24px -24px;
   /* extra bottom padding on phones with a home-indicator bar */
   padding: 1.5rem 1rem calc(1.5rem + env(safe-area-inset-bottom, 0px));
-  background: var(--footer-bg);
-  color: var(--footer-text);
   border-top: 1px solid var(--footer-border);
+  color: var(--footer-text);
   font-size: 0.875rem;
   line-height: 1.5;
   text-align: center;
 }
- 
+
 .site-footer-text {
   margin: 0;
   opacity: 1;
+  font-size: inherit;   /* the global p rule would otherwise make it larger */
+  line-height: inherit;
+  color: inherit;
+  /* Lets \n in config.json's "text" show as real line breaks; still wraps
+     long lines and collapses runs of spaces/tabs like normal text. */
+  white-space: pre-line;
 }
- 
+
 .site-footer-links {
   display: flex;
   flex-wrap: wrap;
@@ -359,7 +393,7 @@ footer {
   gap: 0.25rem 1.25rem;
   margin-top: 0.75rem;
 }
- 
+
 .site-footer-links a {
   margin: 0;
   padding: 0.25rem 0;
@@ -368,20 +402,20 @@ footer {
   text-decoration: none;
   transition: color 0.15s ease;
 }
- 
+
 .site-footer-links a:hover {
   color: var(--footer-link-hover);
   text-decoration: underline;
   text-underline-offset: 0.2em;
 }
- 
+
 .site-footer-links a:focus-visible {
   color: var(--footer-link-hover);
   outline: 2px solid var(--footer-link-hover);
   outline-offset: 3px;
   border-radius: 2px;
 }
- 
+
 @media (prefers-reduced-motion: reduce) {
   .site-footer-links a { transition: none; }
 }

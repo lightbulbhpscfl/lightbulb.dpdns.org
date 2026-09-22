@@ -29,7 +29,10 @@
   //  - Puts the topbar in the browser's "top layer" (popover API). That layer
   //    sits above EVERYTHING on the page regardless of z-index, and (unlike a
   //    modal dialog) it does not block clicks on the rest of the page.
-  //  - Reserves space for the bar so it never covers content.
+  //  - Publishes the bar's real height as the CSS variable --topbar-h (0 while
+  //    hidden) so your CSS can reserve room for it, e.g.
+  //    padding-top: calc(var(--topbar-h, 50px) + 24px). Or set
+  //    <html data-topbar-reserve="true"> to have the script add that padding.
   //  - Optional: <html data-topbar-fit="true"> is for NON-scrolling pages. It
   //    shrinks the page content (CSS zoom) so everything fits below the bar.
   //  - It still hides on purpose while the fullscreen button is active.
@@ -55,9 +58,14 @@
     var style = document.createElement("style");
     style.id = "topbar-pin-style";
     style.textContent =
-      // Room for the bar (--topbar-h is kept up to date by updateTopbarSpace)
-      "html{box-sizing:border-box;padding-top:var(--topbar-h,0px);" +
-      "scroll-padding-top:var(--topbar-h,0px)}" +
+      // --topbar-h always holds the bar's real height (0 while hidden).
+      // Page padding is applied only on request, because many sites already
+      // reserve room in their own CSS:
+      //   <html data-topbar-reserve="true">  adds padding-top = bar height
+      //   <html data-topbar-fit="true">      same, plus scales the page to fit
+      "html{scroll-padding-top:var(--topbar-h,0px)}" +
+      "html[data-topbar-reserve=\"true\"],html[data-topbar-fit=\"true\"]" +
+      "{box-sizing:border-box;padding-top:var(--topbar-h,0px)}" +
       // Position must beat any sticky/relative rule in your own CSS
       "[data-topbar-pinned]{position:fixed!important;top:0!important;" +
       "left:0!important;right:0!important;bottom:auto!important;" +
@@ -491,12 +499,19 @@
 
 
   // ═══════════════════════════════════════════════════════
-  //  FOOTER — built from the "footer" section of /config.json
-  //  If the page already has <footer id="site-footer"> it is filled in;
-  //  otherwise a new one is added to the end of <body>.
-  //  If config.json is missing/invalid or has no footer, nothing is added.
+  //  FOOTER — fills in <footer id="site-footer"> using the "footer"
+  //  section of /config.json. Pages with no <footer> tag are left alone;
+  //  this never creates one. If a <footer> has no id yet, "site-footer"
+  //  is added automatically so you don't have to type it everywhere.
   // ═══════════════════════════════════════════════════════
   async function buildFooter() {
+    var footer =
+      document.getElementById("site-footer") || document.querySelector("footer");
+    if (!footer) return; // page opted out by not including a <footer> tag
+
+    footer.id = "site-footer";
+    footer.classList.add("site-footer");
+
     var config;
 
     try {
@@ -518,32 +533,7 @@
     var links = Array.isArray(data.links) ? data.links : [];
     if (!data.text && !links.length) return;
 
-    var footer = document.getElementById("site-footer");
-
-    if (!footer) {
-      footer = document.createElement("footer");
-      footer.id = "site-footer";
-      footer.className = "site-footer";
-      document.body.appendChild(footer);
-
-      // Minimal default look, inserted FIRST in <head> so your own
-      // stylesheet can override any of it. Uses inherited colors, so it
-      // works in both light and dark themes.
-      if (!document.getElementById("site-footer-style")) {
-        var style = document.createElement("style");
-        style.id = "site-footer-style";
-        style.textContent =
-          ".site-footer{margin-top:2rem;padding:1.25rem 1rem;text-align:center;" +
-          "font-size:.875rem;border-top:1px solid rgba(128,128,128,.3)}" +
-          ".site-footer-text{margin:0;opacity:.75}" +
-          ".site-footer-links{margin-top:.5rem}" +
-          ".site-footer-links a{color:inherit;opacity:.75;text-decoration:none;margin:0 .6rem}" +
-          ".site-footer-links a:hover{opacity:1;text-decoration:underline}";
-        document.head.insertBefore(style, document.head.firstChild);
-      }
-    } else {
-      footer.textContent = ""; // clear any placeholder content
-    }
+    footer.textContent = ""; // clear any placeholder content
 
     // Text (supports {year} → current year)
     if (data.text) {
