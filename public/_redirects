@@ -6,3 +6,7 @@
 /encode.html /random-stuff/encode.html 301
 /techies /unlisted/techies_01 301
 /techies/* /unlisted/techies_01:splat 301
+/js/* /assets/js:splat 301
+/logo-mid-res.png /assets/logo-mid-res.png 301
+/config.json /assets/config.json 301
+/styles.css /assets/styles.css 301
