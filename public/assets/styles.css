@@ -322,7 +322,8 @@ html[data-fullscreen="true"] .topbar-inner {
 
 .viewer iframe {
   display: block;
-  width: 100%;
+  width : 50vh;
+  height: 28.125vh;
   aspect-ratio: 16 / 9;
   border: 0;
   border-radius: 10px;
