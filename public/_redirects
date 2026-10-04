@@ -10,3 +10,4 @@
 /logo-mid-res.png /assets/logo-mid-res.png 301
 /config.json /assets/config.json 301
 /styles.css /assets/styles.css 301
+/global-icons/* /assets/global-icons/:splat 301

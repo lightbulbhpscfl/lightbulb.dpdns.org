@@ -9,6 +9,7 @@
   var FULLSCREEN_LABEL    = "Fullscreen";
   var FULLSCREEN_BTN_GAP  = 8; // px between the fullscreen button and the gear
   var CONFIG_URL          = "/config.json"; // site settings (footer text/links live here)
+  var AUTH_STORAGE_KEY    = "siteAccessGranted"; // must match STORAGE_KEY in password.js
 
 
   // ═══════════════════════════════════════════════════════
@@ -352,6 +353,26 @@
 
 
   // ═══════════════════════════════════════════════════════
+  //  LOGOUT HELPERS
+  //  The logout button only appears while password.js's access key is in
+  //  localStorage. Clicking it removes the key and reloads the page, so a
+  //  password-protected page immediately shows the password prompt again.
+  // ═══════════════════════════════════════════════════════
+  function hasSiteAccess() {
+    try {
+      return localStorage.getItem(AUTH_STORAGE_KEY) !== null;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  function logOut() {
+    try { localStorage.removeItem(AUTH_STORAGE_KEY); } catch (e) { /* ignore */ }
+    window.location.reload();
+  }
+
+
+  // ═══════════════════════════════════════════════════════
   //  SETTINGS GEAR + FLOATING PANEL
   // ═══════════════════════════════════════════════════════
   function buildSettings() {
@@ -443,6 +464,22 @@
 
     panel.appendChild(sectionLabel);
     panel.appendChild(pill);
+
+    // Logout button: only if the user is currently logged in via password.js
+    if (hasSiteAccess()) {
+      var logoutBtn = document.createElement("button");
+      logoutBtn.type = "button";
+      logoutBtn.className = "settings-logout";
+      logoutBtn.textContent = "Log out";
+      logoutBtn.title = "Forget the password on this device";
+      logoutBtn.addEventListener("click", function (e) {
+        e.stopPropagation();
+        logOut();
+      });
+
+      panel.appendChild(logoutBtn);
+    }
+
     document.body.appendChild(panel);
     settingsPanelEl = panel;
 

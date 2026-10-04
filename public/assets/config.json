@@ -7,5 +7,6 @@
       { "label": "Games", "url": "/games" },
       { "label": "Random", "url": "/random-stuff" }
     ]
-  }
+  },
+  "password-hash": "951d9661a914a7b4999e97c3b8d67bab53a33dcfe6546f31f70d6f0c8bc54d15"
 }

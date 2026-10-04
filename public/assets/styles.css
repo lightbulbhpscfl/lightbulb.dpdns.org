@@ -230,7 +230,28 @@ html[data-fullscreen="true"] .topbar-inner {
   transform: translateY(-50%) rotate(60deg);
   opacity: 1;
 }
-
+/* ── Logout button (inside settings panel) ─────────────── */
+/* Paste this into styles.css right after the ".theme-toggle" block. */
+.settings-logout {
+  display: block;
+  width: 100%;
+  margin-top: 12px;
+  padding: 6px 12px;
+  box-sizing: border-box;
+  font: inherit;
+  font-size: 0.8rem;
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+  color: var(--muted);
+  background: var(--card);
+  border: 1.5px solid var(--settings-border);
+  border-radius: 999px;
+  transition: color 0.2s, border-color 0.2s;
+}
+.settings-logout:hover { color: #ef4444; border-color: #ef4444; }
+.settings-logout:focus { outline: none; }
+.settings-logout:focus-visible { outline: 2px solid #ef4444; outline-offset: 2px; }
 /* ── Settings floating panel ───────────────────────────── */
 .settings-panel {
   position: fixed;
@@ -285,7 +306,55 @@ html[data-fullscreen="true"] .topbar-inner {
 .theme-toggle button:focus,
 .theme-toggle button:active { outline: none; }
 .theme-toggle button:focus-visible { outline: 2px solid var(--highlight); outline-offset: 2px; }
+/* ── Embedded viewer (iframe + fullscreen link) ────────── */
+/* Paste at the end of styles.css, or right after the ".video-wrapper" rules. */
 
+/* At most half the screen's width AND half its height, always 16:9.
+   min() picks whichever limit is tighter, so the box fits in the half-screen area. */
+.viewer {
+  width: min(50vw, calc(50vh * 16 / 9), 100%);
+  margin: 0 auto;
+}
+
+.viewer iframe {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border: 0;
+  border-radius: 10px;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.35);
+}
+
+/* Fullscreen link under the iframe, aligned to its right edge */
+.viewer-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 10px;
+}
+
+.viewer-actions a {
+  display: inline-flex;
+  padding: 4px;
+  border-radius: 6px;
+  opacity: 0.75;
+  transition: opacity 0.2s;
+}
+.viewer-actions a:hover { opacity: 1; }
+.viewer-actions a:focus-visible { outline: 2px solid var(--highlight); outline-offset: 2px; }
+
+.viewer-actions img {
+  width: 28px;
+  height: 28px;
+  display: block;
+}
+
+/* Invert the icon in dark mode: manual Dark, or Auto on a dark-preferring device
+   (same logic as the theme variables above). */
+[data-theme="dark"] .viewer-actions img { filter: invert(1); }
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme]) .viewer-actions img { filter: invert(1); }
+}
 /* ── Dice ──────────────────────────────────────────────── */
 .dice {
   width: 120px; height: 120px;
@@ -337,6 +406,7 @@ html[data-fullscreen="true"] .topbar-inner {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
   display: block;
 }
+
 /* ── Lighting Pages ───────────────────────────────────── */
 
  .section-title {

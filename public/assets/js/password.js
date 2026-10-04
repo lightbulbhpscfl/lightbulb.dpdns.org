@@ -1,7 +1,10 @@
 /*
- * password-gate.js
+ * password.js
  * Include on every page, ideally in <head> so there's no flash of content:
- *   <script src="/password-gate.js"></script>
+ *   <script src="/js/password.js"></script>
+ *
+ * The SHA-256 hash of the password is read from /assets/config.json:
+ *   { "password-hash": "951d96...", ... }
  *
  * NOTE: This is client-side only. It keeps casual visitors out, but anyone
  * who views your page source can bypass it. Don't use it to protect
@@ -10,9 +13,9 @@
 (function () {
   'use strict';
 
-  // SHA-256 of the password (the plain text is NOT stored here).
-  var PASSWORD_HASH = '951d9661a914a7b4999e97c3b8d67bab53a33dcfe6546f31f70d6f0c8bc54d15';
-  var STORAGE_KEY = 'siteAccessGranted';
+  var CONFIG_URL = '/assets/config.json';
+  var CONFIG_KEY = 'password-hash';
+  var STORAGE_KEY = 'siteAccessGranted'; // global.js's logout button uses this same key
   var EXPIRY_MS = 7 * 24 * 60 * 60 * 1000; // one week
 
   // ---------- localStorage helpers (wrapped: can throw in private mode) ----------
@@ -49,6 +52,33 @@
   hideStyle.id = 'pw-gate-hide';
   hideStyle.textContent = 'html{visibility:hidden !important;}';
   (document.head || document.documentElement).appendChild(hideStyle);
+
+  // ---------- Load the password hash from config.json ----------
+  // Started right away so it's usually ready by the time someone types.
+  // Resolves to the lowercase hex hash string, rejects if it can't be read.
+  var hashPromise = null;
+
+  function loadHash() {
+    if (!hashPromise) {
+      hashPromise = fetch(CONFIG_URL, { cache: 'no-cache' })
+        .then(function (res) {
+          if (!res.ok) throw new Error('HTTP ' + res.status);
+          return res.json();
+        })
+        .then(function (config) {
+          var hash = config && config[CONFIG_KEY];
+          if (typeof hash !== 'string' || !hash.trim()) {
+            throw new Error('"' + CONFIG_KEY + '" missing from ' + CONFIG_URL);
+          }
+          return hash.trim().toLowerCase();
+        });
+      // Avoid an "unhandled rejection" warning; the submit handler deals with errors.
+      hashPromise.catch(function () {});
+    }
+    return hashPromise;
+  }
+
+  loadHash();
 
   // ---------- SHA-256 ----------
   // Uses the browser's built-in crypto when available (HTTPS / localhost),
@@ -177,17 +207,26 @@
       ev.preventDefault();
       error.textContent = '';
       button.disabled = true;
-      sha256(input.value).then(function (hash) {
-        if (hash === PASSWORD_HASH) {
-          saveAuthorization();
-          location.reload(); // reload so the real page renders normally
-        } else {
-          error.textContent = 'Incorrect password';
-          input.value = '';
-          input.focus();
+
+      Promise.all([sha256(input.value), loadHash()])
+        .then(function (results) {
+          if (results[0] === results[1]) {
+            saveAuthorization();
+            location.reload(); // reload so the real page renders normally
+          } else {
+            error.textContent = 'Incorrect password';
+            input.value = '';
+            input.focus();
+            button.disabled = false;
+          }
+        })
+        .catch(function (err) {
+          console.warn('Password check failed:', err);
+          hashPromise = null; // let the next attempt re-fetch the config
+          loadHash();
+          error.textContent = 'Could not load password settings. Try again.';
           button.disabled = false;
-        }
-      });
+        });
     });
 
     // global.js (deferred) runs right after this and builds the topbar,
