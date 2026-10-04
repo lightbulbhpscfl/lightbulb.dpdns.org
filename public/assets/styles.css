@@ -230,29 +230,8 @@ html[data-fullscreen="true"] .topbar-inner {
   transform: translateY(-50%) rotate(60deg);
   opacity: 1;
 }
-/* ── Logout button (inside settings panel) ─────────────── */
-/* Paste this into styles.css right after the ".theme-toggle" block. */
-.settings-logout {
-  display: block;
-  width: 100%;
-  margin-top: 12px;
-  padding: 6px 12px;
-  box-sizing: border-box;
-  font: inherit;
-  font-size: 0.8rem;
-  font-weight: 700;
-  line-height: 1;
-  cursor: pointer;
-  color: var(--muted);
-  background: var(--card);
-  border: 1.5px solid var(--settings-border);
-  border-radius: 999px;
-  transition: color 0.2s, border-color 0.2s;
-}
-.settings-logout:hover { color: #ef4444; border-color: #ef4444; }
-.settings-logout:focus { outline: none; }
-.settings-logout:focus-visible { outline: 2px solid #ef4444; outline-offset: 2px; }
 /* ── Settings floating panel ───────────────────────────── */
+
 .settings-panel {
   position: fixed;
   z-index: 9999;
@@ -306,6 +285,31 @@ html[data-fullscreen="true"] .topbar-inner {
 .theme-toggle button:focus,
 .theme-toggle button:active { outline: none; }
 .theme-toggle button:focus-visible { outline: 2px solid var(--highlight); outline-offset: 2px; }
+
+/* ── Logout button (inside settings panel) ─────────────── */
+/* Paste this into styles.css right after the ".theme-toggle" block. */
+.settings-logout {
+  display: block;
+  width: 100%;
+  margin-top: 12px;
+  padding: 6px 12px;
+  box-sizing: border-box;
+  font: inherit;
+  font-size: 0.8rem;
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+  color: var(--muted);
+  background: var(--card);
+  border: 1.5px solid var(--settings-border);
+  border-radius: 999px;
+  transition: color 0.2s, border-color 0.2s;
+}
+.settings-logout:hover { color: #ef4444; border-color: #ef4444; }
+.settings-logout:focus { outline: none; }
+.settings-logout:focus-visible { outline: 2px solid #ef4444; outline-offset: 2px; }
+
+
 /* ── Embedded viewer (iframe + fullscreen link) ────────── */
 /* Paste at the end of styles.css, or right after the ".video-wrapper" rules. */
 
@@ -334,6 +338,12 @@ html[data-fullscreen="true"] .topbar-inner {
 
 .viewer-actions a {
   display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;          /* never shrink inside the flex row */
+  min-width: 44px;         /* comfortable tap target, even on small viewers */
+  min-height: 44px;
+  box-sizing: border-box;
   padding: 4px;
   border-radius: 6px;
   opacity: 0.75;
@@ -345,6 +355,9 @@ html[data-fullscreen="true"] .topbar-inner {
 .viewer-actions img {
   width: 28px;
   height: 28px;
+  min-width: 28px;
+  min-height: 28px;
+  flex: 0 0 auto;
   display: block;
 }
 
@@ -361,6 +374,9 @@ html[data-fullscreen="true"] .topbar-inner {
    (same logic as the theme variables above). */
 [data-theme="dark"] .viewer-actions img { filter: invert(1); }
 
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme]) .viewer-actions img { filter: invert(1); }
+}
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme]) .viewer-actions img { filter: invert(1); }
 }
