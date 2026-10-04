@@ -348,6 +348,23 @@ html[data-fullscreen="true"] .topbar-inner {
   display: block;
 }
 
+/* Text-symbol fallback if no fullscreen.svg can be found (follows the theme color) */
+.viewer-actions .fs-fallback {
+  font-size: 24px;
+  line-height: 28px;
+  width: 28px;
+  text-align: center;
+  color: var(--text);
+}
+
+/* Invert the icon in dark mode: manual Dark, or Auto on a dark-preferring device
+   (same logic as the theme variables above). */
+[data-theme="dark"] .viewer-actions img { filter: invert(1); }
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme]) .viewer-actions img { filter: invert(1); }
+}
+
 /* Invert the icon in dark mode: manual Dark, or Auto on a dark-preferring device
    (same logic as the theme variables above). */
 [data-theme="dark"] .viewer-actions img { filter: invert(1); }
