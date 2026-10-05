@@ -4,7 +4,6 @@
   --text: #0f172a;
   --card: rgba(0, 0, 0, 0.05);
   --highlight: #0ea5e9;
-  --button-bg: #0ea5e9;
   --button-text: #ffffff;
   --muted: #475569;
   --dice-bg: #ffffff;
@@ -25,7 +24,6 @@
   --text: #e2e8f0;
   --card: rgba(255, 255, 255, 0.05);
   --highlight: #38bdf8;
-  --button-bg: #38bdf8;
   --button-text: #0f172a;
   --muted: #94a3b8;
   --dice-bg: #1e293b;
@@ -46,7 +44,6 @@
   --text: #0f172a;
   --card: rgba(0, 0, 0, 0.05);
   --highlight: #0ea5e9;
-  --button-bg: #0ea5e9;
   --button-text: #ffffff;
   --muted: #475569;
   --dice-bg: #ffffff;
@@ -68,7 +65,6 @@
     --text: #e2e8f0;
     --card: rgba(255, 255, 255, 0.05);
     --highlight: #38bdf8;
-    --button-bg: #38bdf8;
     --button-text: #0f172a;
     --muted: #94a3b8;
     --dice-bg: #1e293b;
@@ -139,7 +135,7 @@ p {
   padding: 14px 28px;
   font-size: 1rem;
   color: var(--button-text);
-  background: var(--button-bg);
+  background: var(--highlight);
   border: none;
   border-radius: 999px;
   text-decoration: none;
@@ -278,7 +274,7 @@ html[data-fullscreen="true"] .topbar-inner {
   white-space: nowrap;
 }
 .theme-toggle button.active {
-  background: var(--button-bg);
+  background: var(--highlight);
   color: var(--button-text);
 }
 .theme-toggle button:hover:not(.active) { color: var(--highlight); }
@@ -316,7 +312,9 @@ html[data-fullscreen="true"] .topbar-inner {
 /* At most half the screen's width AND half its height, always 16:9.
    min() picks whichever limit is tighter, so the box fits in the half-screen area. */
 .viewer {
-  width: min(50vw, calc(50vh * 16 / 9), 100%);
+  width: 100%;
+  display: flex;
+  justify-content: center;
   margin: 0 auto;
 }
 

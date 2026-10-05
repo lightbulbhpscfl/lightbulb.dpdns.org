@@ -11,3 +11,4 @@
 /config.json /assets/config.json 301
 /styles.css /assets/styles.css 301
 /global-icons/* /assets/global-icons/:splat 301
+/logo-mid-res.png /assets/global-icons.png 301
