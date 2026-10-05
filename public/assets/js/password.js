@@ -157,7 +157,7 @@
     '.pw-card input{width:100%;padding:12px 16px;font:inherit;font-size:1rem;box-sizing:border-box;text-align:center;' +
     'color:var(--text);background:var(--card);border:2px solid var(--settings-border);border-radius:999px;' +
     'outline:none;transition:border-color .2s;}' +
-    '.pw-card input:focus{border-color:var(--highlight);}' +
+    '.pw-card input:focus{border-color:var(--highlight-text);}' +
     '.pw-card .btn{width:100%;cursor:pointer;font-family:inherit;box-sizing:border-box;}' +
     '.pw-card .btn:disabled{opacity:.6;cursor:default;transform:none;box-shadow:none;}' +
     '.pw-error{min-height:1.25rem;margin-top:14px;color:#ef4444;font-size:.95rem;font-weight:bold;}';

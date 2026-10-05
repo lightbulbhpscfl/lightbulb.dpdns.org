@@ -3,8 +3,8 @@
   --bg: linear-gradient(135deg, #f1f5f9, #e2e8f0);
   --text: #0f172a;
   --card: rgba(0, 0, 0, 0.05);
-  --highlight: #0ea5e9;
-  --button-text: #ffffff;
+  --highlight: #7dd3fc;
+  --highlight-text: #075985;
   --muted: #475569;
   --dice-bg: #ffffff;
   --dot-color: #0f172a;
@@ -23,8 +23,8 @@
   --bg: linear-gradient(135deg, #0f172a, #1e293b);
   --text: #e2e8f0;
   --card: rgba(255, 255, 255, 0.05);
-  --highlight: #38bdf8;
-  --button-text: #0f172a;
+  --highlight: #075985;
+  --highlight-text: #7dd3fc;
   --muted: #94a3b8;
   --dice-bg: #1e293b;
   --dot-color: #e2e8f0;
@@ -43,8 +43,8 @@
   --bg: linear-gradient(135deg, #f1f5f9, #e2e8f0);
   --text: #0f172a;
   --card: rgba(0, 0, 0, 0.05);
-  --highlight: #0ea5e9;
-  --button-text: #ffffff;
+  --highlight: #7dd3fc;
+  --highlight-text: #075985;
   --muted: #475569;
   --dice-bg: #ffffff;
   --dot-color: #0f172a;
@@ -64,8 +64,8 @@
     --bg: linear-gradient(135deg, #0f172a, #1e293b);
     --text: #e2e8f0;
     --card: rgba(255, 255, 255, 0.05);
-    --highlight: #38bdf8;
-    --button-text: #0f172a;
+    --highlight: #075985;
+    --highlight-text: #7dd3fc;
     --muted: #94a3b8;
     --dice-bg: #1e293b;
     --dot-color: #e2e8f0;
@@ -127,14 +127,14 @@ p {
   color: var(--muted);
 }
 
-.highlight { color: var(--highlight); font-weight: bold; }
+.highlight { color: var(--highlight-text); font-weight: bold; }
 
 .btn {
   display: inline-block;
   margin-top: 20px;
   padding: 14px 28px;
   font-size: 1rem;
-  color: var(--button-text);
+  color: var(--highlight-text);
   background: var(--highlight);
   border: none;
   border-radius: 999px;
@@ -187,7 +187,7 @@ html[data-fullscreen="true"] .topbar-inner {
 }
 
 .topbar a {
-  color: var(--highlight);
+  color: var(--highlight-text);
   text-decoration: none;
   font-weight: bold;
   display: inline-flex;
@@ -218,7 +218,7 @@ html[data-fullscreen="true"] .topbar-inner {
 }
 .settings-btn:hover { opacity: 1; }
 .settings-btn:focus { outline: none; }
-.settings-btn:focus-visible { outline: 2px solid var(--highlight); outline-offset: 2px; }
+.settings-btn:focus-visible { outline: 2px solid var(--highlight-text); outline-offset: 2px; }
 .settings-btn img {
   width: 26px; height: 26px; display: block;
 }
@@ -275,12 +275,42 @@ html[data-fullscreen="true"] .topbar-inner {
 }
 .theme-toggle button.active {
   background: var(--highlight);
-  color: var(--button-text);
+  color: var(--highlight-text);
 }
-.theme-toggle button:hover:not(.active) { color: var(--highlight); }
+.theme-toggle button:hover:not(.active) { color: var(--highlight-text); }
 .theme-toggle button:focus,
 .theme-toggle button:active { outline: none; }
-.theme-toggle button:focus-visible { outline: 2px solid var(--highlight); outline-offset: 2px; }
+.theme-toggle button:focus-visible { outline: 2px solid var(--highlight-text); outline-offset: 2px; }
+
+/* ── Theme color presets (inside settings panel) ───────── */
+.settings-color-label { margin-top: 14px; }
+
+.settings-swatches {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 3px;            /* room for the selection ring */
+}
+
+.settings-swatch {
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  box-sizing: border-box;
+  cursor: pointer;
+  border: 1.5px solid var(--settings-border);
+  border-radius: 50%;
+  /* the fill color is set by global.js (light or dark shade to match the mode) */
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+.settings-swatch:hover { transform: scale(1.15); }
+.settings-swatch:focus { outline: none; }
+.settings-swatch:focus-visible { outline: 2px solid var(--highlight-text); outline-offset: 3px; }
+
+/* Selected swatch: a gap, then a ring in the text color */
+.settings-swatch.active {
+  box-shadow: 0 0 0 2px var(--settings-panel-bg), 0 0 0 4px var(--text);
+}
 
 /* ── Logout button (inside settings panel) ─────────────── */
 /* Paste this into styles.css right after the ".theme-toggle" block. */
@@ -349,7 +379,7 @@ html[data-fullscreen="true"] .topbar-inner {
   transition: opacity 0.2s;
 }
 .viewer-actions a:hover { opacity: 1; }
-.viewer-actions a:focus-visible { outline: 2px solid var(--highlight); outline-offset: 2px; }
+.viewer-actions a:focus-visible { outline: 2px solid var(--highlight-text); outline-offset: 2px; }
 
 .viewer-actions img {
   width: 28px;

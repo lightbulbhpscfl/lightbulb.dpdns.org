@@ -10,6 +10,24 @@
   var FULLSCREEN_BTN_GAP  = 8; // px between the fullscreen button and the gear
   var CONFIG_URL          = "/config.json"; // site settings (footer text/links live here)
   var AUTH_STORAGE_KEY    = "siteAccessGranted"; // must match STORAGE_KEY in password.js
+  var COLOR_STORAGE_KEY   = "themeColor";        // name of the chosen color preset, e.g. "red"
+
+  // Color presets. Each has a pale shade ("light") and a deep shade ("dark").
+  //   light mode: --highlight = pale shade,  --highlight-text = deep shade
+  //   dark mode:  --highlight = deep shade,  --highlight-text = pale shade
+  // So --highlight (buttons, active pill) matches the mode, and --highlight-text
+  // (topbar text, links) is its inverse. "blue" is the stylesheet's default, so
+  // choosing it just removes the override (keep these hex values in sync with
+  // the --highlight / --highlight-text values in styles.css).
+  var COLOR_PRESETS = [
+    { name: "blue",   label: "Blue",   light: "#7dd3fc", dark: "#075985" },
+    { name: "red",    label: "Red",    light: "#fca5a5", dark: "#991b1b" },
+    { name: "orange", label: "Orange", light: "#fdba74", dark: "#9a3412" },
+    { name: "green",  label: "Green",  light: "#86efac", dark: "#166534" },
+    { name: "purple", label: "Purple", light: "#d8b4fe", dark: "#6b21a8" },
+    { name: "pink",   label: "Pink",   light: "#f9a8d4", dark: "#831843" },
+    { name: "gray",   label: "Gray",   light: "#cbd5e1", dark: "#334155" }
+  ];
 
 
   // ═══════════════════════════════════════════════════════
@@ -23,6 +41,65 @@
       document.documentElement.removeAttribute("data-theme");
     }
   })();
+
+
+  // ═══════════════════════════════════════════════════════
+  //  THEME COLOR — preset accent colors
+  //  The chosen preset's name is saved in localStorage. It is applied as inline
+  //  styles on <html>, which beat every :root / [data-theme] rule in styles.css:
+  //    --highlight       background shade that matches the mode (pale in light
+  //                      mode, deep in dark mode): buttons, active pill
+  //    --highlight-text  the inverse shade (deep in light mode, pale in dark
+  //                      mode): topbar text, links, text on --highlight
+  //  Blue = no override (the stylesheet's own values are used).
+  // ═══════════════════════════════════════════════════════
+  function findPreset(name) {
+    for (var i = 0; i < COLOR_PRESETS.length; i++) {
+      if (COLOR_PRESETS[i].name === name) return COLOR_PRESETS[i];
+    }
+    return null;
+  }
+
+  function readSavedPreset() {
+    try {
+      var n = localStorage.getItem(COLOR_STORAGE_KEY);
+      return findPreset(n) ? n : null;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  // "light" or "dark": the manual choice, or the device setting on Auto
+  function currentMode() {
+    var t = document.documentElement.getAttribute("data-theme");
+    if (t === "light" || t === "dark") return t;
+    return window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches
+      ? "dark"
+      : "light";
+  }
+
+  function applyAccent() {
+    var s = document.documentElement.style;
+    s.removeProperty("--button-text"); // clear anything an older version set
+    var name = readSavedPreset();
+    if (!name || name === "blue") {
+      s.removeProperty("--highlight"); // use the stylesheet's defaults
+      s.removeProperty("--highlight-text");
+      return;
+    }
+    var p = findPreset(name);
+    var light = currentMode() === "light";
+    s.setProperty("--highlight", light ? p.light : p.dark);
+    s.setProperty("--highlight-text", light ? p.dark : p.light);
+  }
+
+  applyAccent();
+
+  // Auto mode: follow the device switching between light and dark
+  if (window.matchMedia) {
+    var accentMq = window.matchMedia("(prefers-color-scheme: dark)");
+    if (accentMq.addEventListener) accentMq.addEventListener("change", applyAccent);
+  }
 
 
   // ═══════════════════════════════════════════════════════
@@ -448,6 +525,7 @@
         e.stopPropagation();
 
         applyTheme(mode.value);
+        syncAccentUI();
 
         pill.querySelectorAll("button").forEach(function (x, i) {
           x.classList.toggle(
@@ -464,6 +542,57 @@
 
     panel.appendChild(sectionLabel);
     panel.appendChild(pill);
+
+    // ── Theme color presets ──
+    var colorLabel = document.createElement("span");
+    colorLabel.className = "settings-section-label settings-color-label";
+    colorLabel.textContent = "Theme color";
+
+    var swatchRow = document.createElement("div");
+    swatchRow.className = "settings-swatches";
+    swatchRow.setAttribute("role", "radiogroup");
+    swatchRow.setAttribute("aria-label", "Theme color");
+
+    var swatches = COLOR_PRESETS.map(function (preset) {
+      var sw = document.createElement("button");
+      sw.type = "button";
+      sw.className = "settings-swatch";
+      sw.title = preset.label;
+      sw.setAttribute("role", "radio");
+      sw.setAttribute("aria-label", preset.label);
+      // two-tone: pale and deep shade, readable on both light and dark panels
+      sw.style.background = "linear-gradient(135deg, " + preset.light + " 50%, " + preset.dark + " 50%)";
+
+      sw.addEventListener("click", function (e) {
+        e.stopPropagation();
+        try { localStorage.setItem(COLOR_STORAGE_KEY, preset.name); } catch (err) { /* ignore */ }
+        syncAccentUI();
+      });
+
+      swatchRow.appendChild(sw);
+      return { preset: preset, el: sw };
+    });
+
+    // Re-applies the color and rings the chosen swatch.
+    function syncAccentUI() {
+      applyAccent();
+      var chosen = readSavedPreset() || "blue";
+      swatches.forEach(function (s) {
+        var on = s.preset.name === chosen;
+        s.el.classList.toggle("active", on);
+        s.el.setAttribute("aria-checked", on ? "true" : "false");
+      });
+    }
+
+    syncAccentUI();
+
+    if (window.matchMedia) {
+      var swatchMq = window.matchMedia("(prefers-color-scheme: dark)");
+      if (swatchMq.addEventListener) swatchMq.addEventListener("change", syncAccentUI);
+    }
+
+    panel.appendChild(colorLabel);
+    panel.appendChild(swatchRow);
 
     // Logout button: only if the user is currently logged in via password.js
     if (hasSiteAccess()) {
