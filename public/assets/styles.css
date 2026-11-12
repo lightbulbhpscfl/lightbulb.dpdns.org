@@ -448,7 +448,7 @@ html[data-fullscreen="true"] .topbar-inner {
   height: calc(1em * var(--scale));
   aspect-ratio: 473 / 821;
   vertical-align: middle;
-  background: url("/logo-mid-res.png") no-repeat center;
+  background: url("/assets/global-icons/logo.png") no-repeat center;
   background-size: contain;
 }
 
